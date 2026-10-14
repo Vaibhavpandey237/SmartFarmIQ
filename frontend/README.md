@@ -1,4 +1,4 @@
-# 🌿 PlantCare AI — Frontend (React 18 + Vite)
+# 🌿 Smart Farm IQ — Frontend (React 18 + Vite)
 
 A modern, responsive, and performant web client for plant disease detection, crop pricing, and automated gardening care.
 

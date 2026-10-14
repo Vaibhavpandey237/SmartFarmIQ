@@ -1,6 +1,6 @@
-# Contributing to PlantCare AI 🌿
+# Contributing to Smart Farm IQ 🌿
 
-Thank you for your interest in contributing to **PlantCare AI**! We welcome contributions from developers, designers, data scientists, and plant enthusiasts.
+Thank you for your interest in contributing to **Smart Farm IQ**! We welcome contributions from developers, designers, data scientists, and plant enthusiasts.
 
 ---
 
@@ -89,4 +89,4 @@ mvn spring-boot:run
 
 ## 📄 License
 
-By contributing to PlantCare AI, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+By contributing to Smart Farm IQ, you agree that your contributions will be licensed under the [MIT License](LICENSE).

@@ -1,4 +1,4 @@
-# 🌱 PlantCare AI — Intelligent Plant Disease Detection & Smart Plant Care Assistant
+# 🌱 Smart Farm IQ — Intelligent Plant Disease Detection & Smart Agricultural Assistant
 
 <p align="center">
   <a href="https://plant-care-ai-phi.vercel.app" target="_blank">
@@ -37,7 +37,7 @@
 
 ## 🌟 Overview
 
-**PlantCare AI** is an intelligent agricultural diagnosis and plant-care platform. By analyzing leaf photographs using deep learning computer vision models, it accurately identifies plant diseases, evaluates health severity, and provides immediate, actionable treatment recommendations, verified product remedies, and long-term care schedules.
+**Smart Farm IQ** is an intelligent agricultural diagnosis and smart farm management platform. By analyzing leaf photographs using deep learning computer vision models, it accurately identifies plant diseases, evaluates health severity, and provides immediate, actionable treatment recommendations, verified product remedies, and long-term care schedules.
 
 ---
 

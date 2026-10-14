@@ -1,6 +1,6 @@
 {
-  "name": "plant-care-ai",
-  "description": "AI-Powered Plant Disease Detection & Smart Plant Care Assistant",
+  "name": "smart-farm-iq",
+  "description": "Smart Farm IQ - AI-Powered Plant Disease Detection & Smart Farm Assistant",
   "private": true,
   "version": "1.0.0",
   "type": "module",

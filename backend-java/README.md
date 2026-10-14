@@ -1,4 +1,4 @@
-# ☕ PlantCare AI — Enterprise Java Backend (Spring Boot 3 + DJL)
+# ☕ Smart Farm IQ — Enterprise Java Backend (Spring Boot 3 + DJL)
 
 High-performance, enterprise-grade REST service for plant disease diagnosis, image processing, and history persistence built with Java 17, Spring Boot 3, and Deep Java Library (DJL).
 

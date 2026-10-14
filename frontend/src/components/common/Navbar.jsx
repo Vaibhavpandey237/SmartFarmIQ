@@ -18,8 +18,8 @@ export default function Navbar({
           <Sprout size={24} />
         </div>
         <div>
-          <h1 className="brand-title">PlantCare AI</h1>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Enterprise Java & React Detection Platform</p>
+          <h1 className="brand-title">Smart Farm IQ</h1>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Smart Agricultural Intelligence & Crop Platform</p>
         </div>
       </div>
 

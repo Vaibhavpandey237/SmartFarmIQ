@@ -1,4 +1,4 @@
-// API Service for PlantCare AI Frontend
+// API Service for Smart Farm IQ Frontend
 
 const API_BASE = '';
 

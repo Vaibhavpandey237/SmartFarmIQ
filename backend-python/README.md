@@ -1,4 +1,4 @@
-# 🐍 PlantCare AI — Python AI Engine & Flask Service
+# 🐍 Smart Farm IQ — Python AI Engine & Flask Service
 
 Deep learning model training, image processing, disease diagnosis, and treatment recommendation engine powered by TensorFlow, OpenCV, and Flask.
 

@@ -141,9 +141,9 @@ export default function AuthPortal({ onLoginSuccess }) {
           <div className="brand-icon" style={{ margin: '0 auto 0.75rem', width: '54px', height: '54px' }}>
             <Sprout size={32} />
           </div>
-          <h1 className="brand-title" style={{ fontSize: '1.8rem' }}>PlantCare AI</h1>
+          <h1 className="brand-title" style={{ fontSize: '1.8rem' }}>Smart Farm IQ</h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            Enterprise Java & React Crop Detection System
+            Smart Agricultural Intelligence & Crop Detection Platform
           </p>
         </div>
 

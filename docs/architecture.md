@@ -1,8 +1,8 @@
-# 🏛️ PlantCare AI — Monorepo Architecture Specification
+# 🏛️ Smart Farm IQ — Monorepo Architecture Specification
 
 ## 🌐 Overview
 
-PlantCare AI is organized as a modular, three-tier monorepo consisting of:
+Smart Farm IQ is organized as a modular, three-tier monorepo consisting of:
 1. **Frontend**: React 18 + Vite SPA client with component modularity.
 2. **Backend (Java)**: Spring Boot 3 + Deep Java Library (DJL) enterprise REST microservice.
 3. **Backend (Python)**: Flask + TensorFlow / Keras deep learning training and inference engine.
