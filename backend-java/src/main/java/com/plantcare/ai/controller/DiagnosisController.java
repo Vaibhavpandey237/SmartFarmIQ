@@ -40,7 +40,7 @@ public class DiagnosisController {
     }
 
     @PostMapping(value = "/diagnose", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<DiagnosisResponse> diagnosePlant(@RequestParam("image") MultipartFile file) {
+    public ResponseEntity<?> diagnosePlant(@RequestParam("image") MultipartFile file) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -68,6 +68,12 @@ public class DiagnosisController {
 
             return ResponseEntity.ok(response);
 
+        } catch (IllegalArgumentException valEx) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("error", "NON_PLANT_IMAGE");
+            err.put("message", valEx.getMessage());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

@@ -45,7 +45,7 @@ export default function CropPricesView() {
             onChange={(e) => setSelectedState(e.target.value)}
           >
             <option value="All">All States & Mandis</option>
-            {currentCropObj.states.map((st, idx) => (
+            {(currentCropObj?.states || []).map((st, idx) => (
               <option key={idx} value={st.stateName}>{st.stateName}</option>
             ))}
           </select>
@@ -55,14 +55,14 @@ export default function CropPricesView() {
       <div className="msp-banner">
         <div>
           <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-teal)', textTransform: 'uppercase' }}>
-            GOVERNMENT MSP RATE ({currentCropObj.mspYear})
+            GOVERNMENT MSP RATE ({currentCropObj?.mspYear || '2026'})
           </span>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '0.2rem' }}>
-            {currentCropObj.name}
+            {currentCropObj?.name || 'Crop'}
           </h3>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <span className="msp-price-tag">₹{currentCropObj.mspINR.toLocaleString('en-IN')}</span>
+          <span className="msp-price-tag">₹{(currentCropObj?.mspINR || 0).toLocaleString('en-IN')}</span>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>per quintal (100 kg)</p>
         </div>
       </div>
@@ -72,9 +72,9 @@ export default function CropPricesView() {
       </h4>
 
       <div className="mandi-grid">
-        {currentCropObj.states
+        {(currentCropObj?.states || [])
           .filter(st => selectedState === 'All' || st.stateName === selectedState)
-          .map(st => st.mandis.map((mandi, mIdx) => (
+          .map(st => (st.mandis || []).map((mandi, mIdx) => (
             <div key={mIdx} className="mandi-card">
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>

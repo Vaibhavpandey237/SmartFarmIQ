@@ -44,7 +44,7 @@ export default function BotanistChatView() {
       </h2>
       <div className="chat-box">
         <div className="chat-messages">
-          {chatMessages.map((msg, idx) => (
+          {(chatMessages || []).map((msg, idx) => (
             <div key={idx} className={`chat-bubble ${msg.sender}`}>
               {msg.text}
             </div>

@@ -15,7 +15,7 @@ export default function RemindersView({ reminders, onMarkDone }) {
             🎉 All caught up! No pending reminders.
           </p>
         ) : (
-          reminders.map(rem => (
+          (reminders || []).map(rem => (
             <div key={rem.id} className="rec-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h4 style={{ fontSize: '0.95rem' }}>{rem.plant} — {rem.task}</h4>

@@ -14,7 +14,7 @@ export default function GardenView({ plantProfiles, onOpenAddPlant }) {
       </div>
 
       <div className="profile-grid">
-        {plantProfiles.map(plant => (
+        {(plantProfiles || []).map(plant => (
           <div key={plant.id} className="profile-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>{plant.name}</h3>

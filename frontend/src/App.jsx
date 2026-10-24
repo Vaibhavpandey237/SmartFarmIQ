@@ -5,6 +5,7 @@ import WeatherBanner from './components/common/WeatherBanner';
 import NavigationTabs from './components/common/NavigationTabs';
 import DashboardView from './components/dashboard/DashboardView';
 import DiagnosisView from './components/diagnosis/DiagnosisView';
+import SoilSenseView from './components/soilsense/SoilSenseView';
 import ProductsStoreView from './components/products/ProductsStoreView';
 import CropPricesView from './components/prices/CropPricesView';
 import GardenView from './components/garden/GardenView';
@@ -26,20 +27,38 @@ export default function App() {
   const [theme, setTheme] = useState(localStorage.getItem('plant_theme') || 'dark');
 
   // Auth State
+  // Auth State (Defaults to Demo Farmer to prevent any blank screen or login lockout)
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('plant_user');
       const savedToken = localStorage.getItem('plant_token');
-      return (savedUser && savedToken) ? JSON.parse(savedUser) : null;
-    } catch (e) {
-      return null;
-    }
+      if (savedUser && savedToken) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+
+    // Safe default demo farmer user
+    const defaultUser = {
+      name: 'Farmer Vaibhav',
+      username: 'farmer_vaibhav',
+      email: 'farmer@smartfarmiq.ai',
+      role: 'USER'
+    };
+    try {
+      localStorage.setItem('plant_user', JSON.stringify(defaultUser));
+      localStorage.setItem('plant_token', 'demo_token_auto');
+    } catch (e) {}
+    return defaultUser;
   });
 
-  // Navigation State
-  const [activeTab, setActiveTab] = useState('dashboard');
+  // Navigation State with localStorage persistence
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('plant_active_tab') || 'soilsense';
+  });
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   // App Data State
   const [history, setHistory] = useState([]);
@@ -76,6 +95,9 @@ export default function App() {
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
+    try {
+      localStorage.setItem('plant_active_tab', tabId);
+    } catch (e) {}
     setMoreDropdownOpen(false);
     setMobileMenuOpen(false);
   };
@@ -158,6 +180,8 @@ export default function App() {
           }} 
         />
       )}
+
+      {activeTab === 'soilsense' && <SoilSenseView user={user} />}
 
       {activeTab === 'store' && <ProductsStoreView />}
 

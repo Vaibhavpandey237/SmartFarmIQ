@@ -204,6 +204,27 @@ export default function AuthPortal({ onLoginSuccess }) {
             <button type="submit" className="btn-primary" style={{ marginTop: '1.25rem' }} disabled={authSubmitting}>
               {authSubmitting ? <><RefreshCw size={18} className="spin" /> Validating Credentials...</> : 'Login & Enter Dashboard'}
             </button>
+
+            <div style={{ marginTop: '1rem', paddingTop: '0.85rem', borderTop: '1px solid var(--bg-card-border)', textAlign: 'center' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ width: '100%', fontSize: '0.86rem', padding: '0.65rem' }}
+                onClick={() => {
+                  const demoUser = {
+                    name: 'Farmer Vaibhav',
+                    username: 'farmer_vaibhav',
+                    email: 'farmer@smartfarmiq.ai',
+                    role: 'USER'
+                  };
+                  localStorage.setItem('plant_token', 'demo_token_' + Date.now());
+                  localStorage.setItem('plant_user', JSON.stringify(demoUser));
+                  onLoginSuccess(demoUser);
+                }}
+              >
+                🌱 1-Click Instant Demo Login (Farmer Mode)
+              </button>
+            </div>
           </form>
         )}
 

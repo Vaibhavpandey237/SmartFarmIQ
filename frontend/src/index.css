@@ -685,17 +685,1476 @@ body {
   }
 }
 
-/* Print PDF Styles */
+/* ========================================================
+   SOILSENSE AI DESIGN SYSTEM & COMPONENT STYLES
+   ======================================================== */
+
+.soilsense-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Hero Card */
+.soilsense-hero-card {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 2.25rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(20, 184, 166, 0.12));
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.soilsense-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--accent-green);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.soilsense-hero-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, #10B981, #14B8A6, #34D399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.soilsense-hero-description {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+}
+
+.soilsense-hero-actions {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  padding: 0.85rem 1.6rem;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-soil-card-visual {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--bg-card-border);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.hero-soil-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-visual-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: rgba(11, 19, 21, 0.88);
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bg-card-border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* 3-Step Walkthrough Grid */
+.soilsense-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.step-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-green);
+}
+
+.step-number {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-teal));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--text-main);
+}
+
+.step-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Sub-Navigation Bar */
+.soilsense-subnav-bar {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 0.4rem;
+  overflow-x: auto;
+}
+
+.subnav-btn {
+  padding: 0.65rem 1.15rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.subnav-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.subnav-btn.active {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-teal));
+  color: white;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+/* Soil Scanner & Dropzone */
+.soil-dropzone-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.soil-dropzone {
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  background: rgba(18, 30, 33, 0.5);
+  transition: all 0.25s ease;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.soil-dropzone:hover, .soil-dropzone.drag-active {
+  border-color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.soil-dropzone.has-preview {
+  padding: 0;
+  border-style: solid;
+  cursor: default;
+  overflow: hidden;
+}
+
+.dropzone-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dropzone-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(20, 184, 166, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(20, 184, 166, 0.25);
+}
+
+.soil-preview-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 380px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.soil-preview-img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-overlay-actions {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-pill-action {
+  background: rgba(11, 19, 21, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--bg-card-border);
+  color: var(--text-main);
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-pill-action:hover {
+  background: var(--accent-green);
+  color: white;
+  border-color: var(--accent-green);
+}
+
+/* Radar Scan Progress Bar */
+.scanning-progress-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(18, 30, 33, 0.7);
+  border: 1px solid var(--bg-card-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-radar-line {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent-green), var(--accent-teal), transparent);
+  animation: radarScan 1.6s infinite linear;
+}
+
+@keyframes radarScan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Demo Samples Bar */
+.demo-samples-bar {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.demo-chips-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.demo-soil-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem 0.3rem 0.35rem;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.demo-soil-chip:hover {
+  border-color: var(--accent-teal);
+  background: rgba(20, 184, 166, 0.1);
+  transform: translateY(-1px);
+}
+
+.demo-chip-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Camera Live Feed */
+.camera-live-box {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.camera-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.camera-video {
+  width: 100%;
+  max-height: 420px;
+  border-radius: var(--radius-md);
+  background: black;
+  display: block;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* Result Card Presentation */
+.soil-result-card-container {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.soil-result-header-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.soil-thumb-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.result-img-wrapper {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--bg-card-border);
+}
+
+.result-soil-img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.soil-sample-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(11, 19, 21, 0.85);
+  backdrop-filter: blur(8px);
+  color: var(--accent-teal);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--bg-card-border);
+}
+
+.confidence-meter-box {
+  background: rgba(18, 30, 33, 0.6);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+}
+
+.confidence-track {
+  height: 8px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.45rem;
+}
+
+.confidence-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.soil-details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.texture-highlight-box {
+  background: rgba(20, 184, 166, 0.08);
+  border: 1px solid rgba(20, 184, 166, 0.25);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.alternative-classes-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.alt-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bg-card-border);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.manual-correction-box {
+  background: rgba(18, 30, 33, 0.85);
+  border: 1px solid var(--accent-teal);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-top: 0.75rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.group-chips-grid {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.group-chip-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--bg-card-border);
+  color: var(--text-main);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.group-chip-btn:hover {
+  border-color: var(--accent-teal);
+}
+
+.group-chip-btn.selected {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-teal));
+  color: white;
+  border-color: transparent;
+}
+
+/* Agronomic Estimates 4-Col Grid */
+.agronomic-estimates-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.estimate-card {
+  background: rgba(18, 30, 33, 0.5);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.estimate-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.estimate-label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: block;
+}
+
+.estimate-value {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0.15rem 0;
+  line-height: 1.35;
+}
+
+.estimate-tag {
+  font-size: 0.72rem;
+  color: var(--accent-teal);
+  font-weight: 600;
+}
+
+/* Limitations & Next Steps */
+.limitations-next-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.card-sub-block {
+  background: rgba(18, 30, 33, 0.4);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+}
+
+.info-bullets {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.info-bullets li {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-main);
+  position: relative;
+  padding-left: 1.15rem;
+}
+
+.info-bullets li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent-teal);
+  font-weight: bold;
+}
+
+.scientific-disclaimer-box {
+  background: rgba(20, 184, 166, 0.05);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.result-actions-footer {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bg-card-border);
+}
+
+/* Crop Recommendation Engine Form */
+.crop-engine-form-card {
+  padding: 1.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.form-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.15rem;
+  margin-top: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.styled-select, .styled-input {
+  background: var(--input-bg);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.styled-select:focus, .styled-input:focus {
+  border-color: var(--accent-green);
+}
+
+.styled-slider {
+  width: 100%;
+  accent-color: var(--accent-green);
+  cursor: pointer;
+}
+
+.ph-scale-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  margin-top: 0.2rem;
+}
+
+.soil-test-inputs-drawer {
+  background: rgba(18, 30, 33, 0.5);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Ranked Crops Section */
+.ranked-crops-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.crops-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.35rem;
+}
+
+.crop-card {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.crop-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-green);
+}
+
+.crop-card-image-wrap {
+  position: relative;
+  height: 175px;
+  overflow: hidden;
+}
+
+.crop-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.crop-rank-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(11, 19, 21, 0.85);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 1px solid var(--bg-card-border);
+}
+
+.crop-score-pill {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  backdrop-filter: blur(12px);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.suitability-high {
+  background: rgba(16, 185, 129, 0.9);
+  color: #FFFFFF;
+}
+
+.suitability-good {
+  background: rgba(20, 184, 166, 0.9);
+  color: #FFFFFF;
+}
+
+.suitability-moderate {
+  background: rgba(245, 158, 11, 0.9);
+  color: #FFFFFF;
+}
+
+.suitability-marginal {
+  background: rgba(148, 163, 184, 0.9);
+  color: #0F172A;
+}
+
+.crop-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.crop-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.crop-category-tag {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.crop-scientific-name {
+  font-size: 0.78rem;
+  color: var(--accent-teal);
+  margin-bottom: 0.65rem;
+}
+
+.score-breakdown-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  background: rgba(18, 30, 33, 0.6);
+  padding: 0.4rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.breakdown-segment {
+  display: flex;
+  flex-direction: column;
+}
+
+.segment-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.segment-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+
+.crop-reasons-box {
+  background: rgba(18, 30, 33, 0.4);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 8px;
+  padding: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.reasons-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.reasons-list li {
+  font-size: 0.78rem;
+  color: var(--text-main);
+  line-height: 1.35;
+  position: relative;
+  padding-left: 0.85rem;
+}
+
+.reasons-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent-green);
+  font-weight: bold;
+}
+
+.crop-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  font-size: 0.78rem;
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.meta-label {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.meta-value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.crop-card-footer {
+  margin-top: auto;
+}
+
+/* Soil Improvement Grid */
+.guidelines-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.guideline-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.guideline-header {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.guideline-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.guideline-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.guideline-summary {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+
+.guideline-tips-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.tip-item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+
+.guideline-footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bg-card-border);
+}
+
+/* Farm Profile & Scan Comparison */
+.farm-profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.scans-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.scan-history-item {
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scan-history-item:hover {
+  border-color: var(--accent-teal);
+}
+
+.scan-history-item.selected-a {
+  border-color: var(--accent-teal);
+  background: rgba(20, 184, 166, 0.08);
+}
+
+.scan-history-item.selected-b {
+  border-color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.history-soil-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.history-soil-thumb-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(20, 184, 166, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compare-drawer-box {
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.compare-card {
+  background: rgba(18, 30, 33, 0.6);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.compare-empty {
+  border: 1px dashed var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  padding: 1.75rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-card.modal-lg {
+  max-width: 760px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.modal-footer {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Official Printable PDF Report Sheet */
+.soil-report-modal {
+  max-width: 860px;
+  padding: 0;
+  background: #0B1315;
+}
+
+.report-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: rgba(18, 30, 33, 0.95);
+  border-bottom: 1px solid var(--bg-card-border);
+}
+
+.soil-report-sheet {
+  background: #FFFFFF;
+  color: #0F172A;
+  padding: 2.5rem;
+  font-family: var(--font-sans);
+}
+
+.report-doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.report-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.report-brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10B981, #14B8A6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-title {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #064E3B;
+  margin: 0;
+}
+
+.report-subtitle {
+  font-size: 0.85rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.report-meta-box {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.verified-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+
+.report-divider {
+  border: 0;
+  border-top: 2px solid #E2E8F0;
+  margin: 1.25rem 0;
+}
+
+.report-section {
+  margin-bottom: 1.5rem;
+}
+
+.report-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #064E3B;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.report-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  font-size: 0.86rem;
+}
+
+.info-lbl {
+  color: #64748B;
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.info-val {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.report-soil-summary-box {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  background: #F8FAFC;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+}
+
+.report-soil-photo-wrap {
+  width: 130px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.report-soil-photo {
+  width: 100%;
+  height: 95px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+}
+
+.photo-caption {
+  font-size: 0.7rem;
+  color: #64748B;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.data-sublbl {
+  font-size: 0.72rem;
+  color: #64748B;
+  text-transform: uppercase;
+  display: block;
+}
+
+.data-mainval {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #064E3B;
+  margin: 0.1rem 0 0;
+}
+
+.report-subgrid {
+  font-size: 0.82rem;
+  color: #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.report-crops-table-wrap {
+  overflow-x: auto;
+}
+
+.report-crops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.report-crops-table th {
+  background: #F1F5F9;
+  color: #334155;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border: 1px solid #CBD5E1;
+  font-weight: 700;
+}
+
+.report-crops-table td {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #CBD5E1;
+  color: #0F172A;
+  vertical-align: top;
+}
+
+.report-score-badge {
+  background: #ECFDF5;
+  color: #065F46;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.report-reasons-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.report-reasons-bullets li {
+  position: relative;
+  padding-left: 0.75rem;
+  font-size: 0.78rem;
+}
+
+.report-reasons-bullets li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #059669;
+}
+
+.report-advice-box {
+  background: #F8FAFC;
+  border-left: 4px solid #10B981;
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #1E293B;
+}
+
+.report-doc-footer {
+  margin-top: 2rem;
+  border-top: 1px solid #CBD5E1;
+  padding-top: 1rem;
+}
+
+.disclaimer-text {
+  font-size: 0.72rem;
+  color: #64748B;
+  line-height: 1.5;
+}
+
+.report-signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+/* Responsive Breakpoints for SoilSense AI */
+@media (max-width: 992px) {
+  .soilsense-hero-card {
+    grid-template-columns: 1fr;
+  }
+  .soilsense-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .soil-result-header-grid {
+    grid-template-columns: 1fr;
+  }
+  .agronomic-estimates-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .form-fields-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .crops-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .guidelines-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .agronomic-estimates-grid {
+    grid-template-columns: 1fr;
+  }
+  .limitations-next-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-fields-grid {
+    grid-template-columns: 1fr;
+  }
+  .crops-grid {
+    grid-template-columns: 1fr;
+  }
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+  .soil-report-sheet {
+    padding: 1.25rem;
+  }
+}
+
+/* Print PDF Specific Overrides */
 @media print {
   body {
     background: white !important;
     color: black !important;
   }
-  .navbar, .tab-bar, .weather-banner, .btn-primary, .btn-secondary, .dropzone, .hamburger-btn {
+  .navbar, .tab-bar, .weather-banner, .btn-primary, .btn-secondary, .dropzone, 
+  .hamburger-btn, .no-print, .modal-backdrop::before, .report-modal-actions,
+  .soilsense-hero-card, .soilsense-steps-grid, .soilsense-subnav-bar {
     display: none !important;
+  }
+  .modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .soil-report-modal {
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .soil-report-sheet {
+    padding: 0 !important;
   }
   .card {
     border: none !important;
     box-shadow: none !important;
   }
 }
+
+/* Smooth Focus Pulse Highlight */
+@keyframes pulseFocusGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    outline: 2px solid rgba(16, 185, 129, 0.9);
+  }
+  50% {
+    box-shadow: 0 0 30px 8px rgba(16, 185, 129, 0.45);
+    outline: 2px solid rgba(16, 185, 129, 1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    outline: 2px solid transparent;
+  }
+}
+
+.pulse-focus {
+  animation: pulseFocusGlow 1.8s ease-out;
+  border-radius: var(--radius-lg);
+}
+

@@ -47,6 +47,8 @@ public class ImageProcessingService {
         long yellowPixels = 0;
         long brownPixels = 0;
         long greenPixels = 0;
+        long skinPixels = 0;
+        long backdropPixels = 0;
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -55,31 +57,69 @@ public class ImageProcessingService {
                 int g = (rgb >> 8) & 0xFF;
                 int b = rgb & 0xFF;
 
-                // Green detection (Chlorophyll)
-                if (g > r + 10 && g > b + 10) {
+                // 1. Human Skin Detection
+                double cb = -0.168736 * r - 0.331264 * g + 0.5 * b + 128;
+                double cr = 0.5 * r - 0.418688 * g - 0.081312 * b + 128;
+                boolean isSkin = (cb >= 77 && cb <= 127 && cr >= 133 && cr <= 173) ||
+                                 (r > 80 && g > 45 && b > 30 && r > g && g > b && (r - g >= 10) && (g - b >= 5));
+                if (isSkin) {
+                    skinPixels++;
+                }
+
+                // 2. Green detection (Chlorophyll)
+                int excessGreen = 2 * g - r - b;
+                if (excessGreen > 12 && g > r + 6 && g > b + 6 && g >= 35 && g <= 240) {
                     greenPixels++;
                 }
-                // Yellow detection (Chlorosis)
-                else if (r > 130 && g > 130 && b < 110) {
+                // 3. Yellow detection (Chlorosis)
+                else if (r >= 70 && g >= 70 && b <= 125 && Math.abs(r - g) <= 28 && g > b + 18) {
                     yellowPixels++;
                 }
-                // Brown detection (Necrosis / Drying)
-                else if (r > 100 && g > 60 && g < r && b < 70) {
+                // 4. Brown detection (Necrosis / Drying)
+                else if (r >= 55 && r <= 165 && g >= 35 && g <= 130 && b <= 85 && r > g && g > b && (r - g <= 45)) {
                     brownPixels++;
+                }
+
+                // 5. Neutral studio/passport backdrop
+                if ((r > 215 && g > 215 && b > 215) || (b > 180 && r > 160 && g > 160 && Math.abs(r - g) < 20)) {
+                    backdropPixels++;
                 }
             }
         }
 
         double greenPct = (greenPixels * 100.0) / Math.max(1, totalPixels);
         double yellowPct = (yellowPixels * 100.0) / Math.max(1, totalPixels);
-        double brownPct = (brownPixels * 100.0) / Math.max(1, totalPixels);
+        boolean hasLeafBase = greenPct >= 5.0 || yellowPct >= 8.0;
+        double brownPct = hasLeafBase ? ((brownPixels * 100.0) / Math.max(1, totalPixels)) : 0.0;
+        double skinPct = (skinPixels * 100.0) / Math.max(1, totalPixels);
+        double backdropPct = (backdropPixels * 100.0) / Math.max(1, totalPixels);
+        double totalFoliagePct = greenPct + yellowPct + brownPct;
+
+        boolean isValidPlantLeaf = true;
+        String rejectionReason = null;
+
+        boolean isHumanPortrait = (skinPct >= 7.0 && totalFoliagePct < 8.0) ||
+                                (skinPct >= 20.0 && totalFoliagePct < 15.0) ||
+                                (skinPct >= 5.0 && backdropPct >= 20.0 && totalFoliagePct < 8.0);
+
+        if (isHumanPortrait) {
+            isValidPlantLeaf = false;
+            rejectionReason = "अमान्य फोटो: इंसान का चेहरा / पासपोर्ट फोटो डिटेक्ट हुआ है। कृपया केवल फसल या पौधे की पत्ती (Crop Leaf) की फोटो अपलोड करें। (Human portrait / passport photo detected.)";
+        } else if (totalFoliagePct < 15.0) {
+            isValidPlantLeaf = false;
+            rejectionReason = "अमान्य फोटो: इस फोटो में कोई पौधा या पत्ती नहीं मिली। कृपया केवल फसल या पौधे की पत्ती (Plant Leaf) की साफ फोटो अपलोड करें। (Non-plant image: No crop leaf foliage detected.)";
+        }
 
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("imageWidth", width);
         metrics.put("imageHeight", height);
-        metrics.put("greenCoveragePct", Math.round(greenPct * 100.0) / 100.0);
-        metrics.put("chlorosisYellowPct", Math.round(yellowPct * 100.0) / 100.0);
-        metrics.put("necrosisBrownPct", Math.round(brownPct * 100.0) / 100.0);
+        metrics.put("greenCoveragePct", Math.round(greenPct * 10.0) / 10.0);
+        metrics.put("chlorosisYellowPct", Math.round(yellowPct * 10.0) / 10.0);
+        metrics.put("necrosisBrownPct", Math.round(brownPct * 10.0) / 10.0);
+        metrics.put("skinPct", Math.round(skinPct * 10.0) / 10.0);
+        metrics.put("foliagePct", Math.round(totalFoliagePct * 10.0) / 10.0);
+        metrics.put("isValidPlantLeaf", isValidPlantLeaf);
+        metrics.put("rejectionReason", rejectionReason);
 
         return metrics;
     }

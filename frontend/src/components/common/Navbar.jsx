@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sprout, LogOut, Sun, Moon, Download, Menu } from 'lucide-react';
+import { Sprout, LogOut, Sun, Moon, Download, Menu, FileText } from 'lucide-react';
 
 export default function Navbar({
   user,
@@ -24,6 +24,17 @@ export default function Navbar({
       </div>
 
       <div className="nav-actions">
+        <a 
+          href="/SmartFarmIQ_Innotech_Viva_Guide.pdf" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="btn-secondary" 
+          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#8B5CF6', borderColor: 'rgba(139, 92, 246, 0.4)' }}
+          title="Download Innotech Viva & Defense Guide PDF"
+        >
+          <FileText size={15} /> <span>Viva Guide</span>
+        </a>
+
         {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span 

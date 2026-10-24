@@ -52,6 +52,12 @@ public class DjlInferenceService {
             Map<String, Object> metrics = imageProcessingService.analyzeLeafColorMetrics(originalImg);
             response.setImageAnalysisMetrics(metrics);
 
+            boolean isValidPlant = (boolean) metrics.getOrDefault("isValidPlantLeaf", true);
+            if (!isValidPlant) {
+                String reason = (String) metrics.getOrDefault("rejectionReason", "Non-plant image detected");
+                throw new IllegalArgumentException(reason);
+            }
+
             // 2. Perform AI Classification Simulation / DJL Model Inference Logic
             double yellowPct = (double) metrics.getOrDefault("chlorosisYellowPct", 0.0);
             double brownPct = (double) metrics.getOrDefault("necrosisBrownPct", 0.0);
