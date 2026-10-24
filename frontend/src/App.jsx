@@ -106,11 +106,15 @@ export default function App() {
 
   const handleNativeInstall = async () => {
     if (installPrompt) {
-      installPrompt.prompt();
-      const choice = await installPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        setInstallPrompt(null);
-        setShowInstallModal(false);
+      try {
+        await installPrompt.prompt();
+        const choice = await installPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          setInstallPrompt(null);
+          setShowInstallModal(false);
+        }
+      } catch (err) {
+        console.warn('PWA Install Prompt error:', err);
       }
     }
   };
