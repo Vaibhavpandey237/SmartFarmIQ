@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, Activity, ShoppingCart, TrendingUp, Leaf, 
   ChevronDown, ChevronUp, MessageSquare, History, Bell, ShieldCheck,
-  Layers, FileText
+  Layers
 } from 'lucide-react';
 
 export default function NavigationTabs({
@@ -50,15 +50,6 @@ export default function NavigationTabs({
           <button className={`tab-btn ${activeTab === 'reminders' ? 'active' : ''}`} onClick={() => onTabClick('reminders')}>
             <Bell size={18} /> Reminders ({remindersCount})
           </button>
-          <a 
-            href="/SmartFarmIQ_Innotech_Viva_Guide.pdf" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="tab-btn" 
-            style={{ textDecoration: 'none', color: '#8B5CF6' }}
-          >
-            <FileText size={18} color="#8B5CF6" /> Innotech Viva Guide (PDF)
-          </a>
           {user?.role === 'ADMIN' && (
             <button className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => onTabClick('admin')}>
               <ShieldCheck size={18} /> Admin Panel
@@ -111,15 +102,6 @@ export default function NavigationTabs({
               <button className={`dropdown-item ${activeTab === 'reminders' ? 'active' : ''}`} onClick={() => onTabClick('reminders')}>
                 <Bell size={16} /> Reminders ({remindersCount})
               </button>
-              <a 
-                href="/SmartFarmIQ_Innotech_Viva_Guide.pdf" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="dropdown-item" 
-                style={{ textDecoration: 'none', color: '#8B5CF6' }}
-              >
-                <FileText size={16} /> Innotech Viva Guide (PDF)
-              </a>
               {user?.role === 'ADMIN' && (
                 <button className={`dropdown-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => onTabClick('admin')}>
                   <ShieldCheck size={16} /> Admin Panel

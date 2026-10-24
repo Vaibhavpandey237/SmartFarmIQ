@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Layers, Sprout, Sparkles, Droplets, Camera, ArrowRight, 
   BookOpen, Bookmark, ShieldCheck, HelpCircle, CheckCircle2, 
-  MapPin, Sliders, RefreshCw, FileText 
+  MapPin, Sliders, RefreshCw 
 } from 'lucide-react';
 import SoilScanner from './SoilScanner';
 import SoilResultCard from './SoilResultCard';
@@ -169,16 +169,6 @@ export default function SoilSenseView({ user }) {
             >
               <Sprout size={18} /> Get Crop Recommendations
             </button>
-            <a 
-              href="/SmartFarmIQ_Innotech_Viva_Guide.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn-secondary hero-btn"
-              style={{ textDecoration: 'none', color: '#8B5CF6', borderColor: 'rgba(139, 92, 246, 0.4)' }}
-              title="Download Innotech Viva & Defense Guide PDF"
-            >
-              <FileText size={18} /> Innotech Viva Guide
-            </a>
           </div>
         </div>
 

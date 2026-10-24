@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Activity, MessageSquare, Plus, Bell, Download, 
-  Layers, TrendingUp, ShoppingCart, FileText, Sparkles, Sprout, ArrowRight, CheckCircle2 
+  Layers, TrendingUp, ShoppingCart, Sparkles, Sprout, ArrowRight, CheckCircle2 
 } from 'lucide-react';
 
 export default function DashboardView({
@@ -37,63 +37,25 @@ export default function DashboardView({
         </div>
       </section>
 
-      {/* FEATURE SPOTLIGHT: SOILSENSE AI & INNOTECH VIVA GUIDE */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
-        {/* SoilSense AI Card */}
-        <div className="card" style={{ borderLeft: '4px solid var(--accent-teal)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ background: 'rgba(20, 184, 166, 0.15)', padding: '6px', borderRadius: '8px', color: 'var(--accent-teal)' }}>
-                  <Layers size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>SoilSense AI Suite</h3>
-              </div>
-              <span style={{ background: '#10B981', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
-                NEW
-              </span>
+      {/* FEATURE SPOTLIGHT: SOILSENSE AI */}
+      <div className="card" style={{ borderLeft: '4px solid var(--accent-teal)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ maxWidth: '680px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.4rem' }}>
+            <div style={{ background: 'rgba(20, 184, 166, 0.15)', padding: '6px', borderRadius: '8px', color: 'var(--accent-teal)' }}>
+              <Layers size={20} />
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1rem' }}>
-              Optical soil clod analysis, Indian agro-climatic zoning, texture estimation, and verified crop suitability recommendations.
-            </p>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>SoilSense AI Suite</h3>
+            <span style={{ background: '#10B981', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+              NEW
+            </span>
           </div>
-          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <button className="btn-primary" style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem', width: 'auto' }} onClick={() => onTabClick('soilsense')}>
-              <Sparkles size={15} /> Open SoilSense AI <ArrowRight size={14} />
-            </button>
-          </div>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Optical soil clod analysis, Indian agro-climatic zoning, texture estimation, and verified crop suitability recommendations.
+          </p>
         </div>
-
-        {/* Innotech Presentation & Viva Guide Banner */}
-        <div className="card" style={{ borderLeft: '4px solid #8B5CF6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ background: 'rgba(139, 92, 246, 0.15)', padding: '6px', borderRadius: '8px', color: '#8B5CF6' }}>
-                  <FileText size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Innotech Viva & Defense Guide</h3>
-              </div>
-              <span style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#A78BFA', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
-                PRESENTATION READY
-              </span>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1rem' }}>
-              Comprehensive preparation guide containing 25+ viva questions, AI model architectures (CNN & DJL), dataset statistics, and project pitch for evaluators.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <a 
-              href="/SmartFarmIQ_Innotech_Viva_Guide.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn-secondary" 
-              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '0.5rem 0.85rem', fontSize: '0.85rem', color: '#8B5CF6', borderColor: 'rgba(139, 92, 246, 0.4)' }}
-            >
-              <Download size={15} /> Download Viva Guide (PDF)
-            </a>
-          </div>
-        </div>
+        <button className="btn-primary" style={{ padding: '0.6rem 1.1rem', fontSize: '0.9rem', width: 'auto', margin: 0 }} onClick={() => onTabClick('soilsense')}>
+          <Sparkles size={16} /> Open SoilSense AI <ArrowRight size={15} />
+        </button>
       </div>
 
       {/* KPI Stats Grid */}
@@ -142,15 +104,6 @@ export default function DashboardView({
           <button className="btn-secondary" style={{ padding: '0.85rem', justifyContent: 'center' }} onClick={() => onTabClick('chat')}>
             <MessageSquare size={18} color="var(--accent-teal)" /> Ask AI Botanist
           </button>
-          <a 
-            href="/SmartFarmIQ_Innotech_Viva_Guide.pdf" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="btn-secondary" 
-            style={{ padding: '0.85rem', justifyContent: 'center', textDecoration: 'none', color: '#8B5CF6', borderColor: 'rgba(139, 92, 246, 0.4)' }}
-          >
-            <FileText size={18} color="#8B5CF6" /> Viva Guide (PDF)
-          </a>
           <button className="btn-secondary" style={{ padding: '0.85rem', justifyContent: 'center' }} onClick={onOpenAddPlant}>
             <Plus size={18} color="#10B981" /> Add New Plant
           </button>
