@@ -52,13 +52,21 @@ export default function App() {
     return defaultUser;
   });
 
-  // Navigation State with localStorage persistence
+  // Navigation State with URL param/hash support and localStorage persistence
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('plant_active_tab') || 'soilsense';
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam) return tabParam;
+      const hash = window.location.hash.replace('#', '');
+      if (hash) return hash;
+      return localStorage.getItem('plant_active_tab') || 'soilsense';
+    } catch (e) {
+      return 'soilsense';
+    }
   });
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
 
   // App Data State
   const [history, setHistory] = useState([]);
@@ -66,6 +74,16 @@ export default function App() {
   const [reminders, setReminders] = useState(INITIAL_REMINDERS);
   const [showAddPlantModal, setShowAddPlantModal] = useState(false);
   const [lastDiagnosisResult, setLastDiagnosisResult] = useState(null);
+
+  // Listen for hash changes
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) setActiveTab(hash);
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Sync Theme with DOM
   useEffect(() => {
@@ -97,6 +115,7 @@ export default function App() {
     setActiveTab(tabId);
     try {
       localStorage.setItem('plant_active_tab', tabId);
+      window.location.hash = tabId;
     } catch (e) {}
     setMoreDropdownOpen(false);
     setMobileMenuOpen(false);
