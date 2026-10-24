@@ -9,7 +9,8 @@ export default function Navbar({
   onTabClick,
   mobileMenuOpen,
   setMobileMenuOpen,
-  hasResult
+  hasResult,
+  onOpenInstallModal
 }) {
   return (
     <header className="navbar">
@@ -24,6 +25,26 @@ export default function Navbar({
       </div>
 
       <div className="nav-actions">
+        {/* Install / Download App Button */}
+        <button 
+          type="button"
+          className="btn-primary install-app-btn"
+          onClick={onOpenInstallModal}
+          title="Download and Install Smart Farm IQ App on Android, iPhone, or PC"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '0.42rem 0.85rem',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            borderRadius: '10px',
+            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+            cursor: 'pointer'
+          }}
+        >
+          <Download size={15} /> <span>Download App</span>
+        </button>
         {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span 

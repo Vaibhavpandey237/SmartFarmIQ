@@ -14,6 +14,7 @@ import RemindersView from './components/garden/RemindersView';
 import BotanistChatView from './components/assistant/BotanistChatView';
 import HistoryTrendView from './components/history/HistoryTrendView';
 import AdminPanelView from './components/admin/AdminPanelView';
+import InstallAppModal from './components/common/InstallAppModal';
 
 import { 
   INITIAL_PLANT_PROFILES, 
@@ -74,6 +75,45 @@ export default function App() {
   const [reminders, setReminders] = useState(INITIAL_REMINDERS);
   const [showAddPlantModal, setShowAddPlantModal] = useState(false);
   const [lastDiagnosisResult, setLastDiagnosisResult] = useState(null);
+
+  // PWA Install State
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  // Listen for PWA beforeinstallprompt event
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      setIsAppInstalled(true);
+    }
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', () => {
+      setIsAppInstalled(true);
+      setInstallPrompt(null);
+      setShowInstallModal(false);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
+  }, []);
+
+  const handleNativeInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setInstallPrompt(null);
+        setShowInstallModal(false);
+      }
+    }
+  };
 
   // Listen for hash changes
   useEffect(() => {
@@ -162,6 +202,7 @@ export default function App() {
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
         hasResult={!!lastDiagnosisResult}
+        onOpenInstallModal={() => setShowInstallModal(true)}
       />
 
       {/* Navigation Tab Bar & Drawers */}
@@ -174,6 +215,7 @@ export default function App() {
         moreDropdownOpen={moreDropdownOpen}
         setMoreDropdownOpen={setMoreDropdownOpen}
         mobileMenuOpen={mobileMenuOpen}
+        onOpenInstallModal={() => setShowInstallModal(true)}
       />
 
       {/* Weather Forecast Banner */}
@@ -188,6 +230,7 @@ export default function App() {
           reminders={reminders}
           onTabClick={handleTabClick}
           onOpenAddPlant={() => setShowAddPlantModal(true)}
+          onOpenInstallModal={() => setShowInstallModal(true)}
         />
       )}
 
@@ -231,6 +274,14 @@ export default function App() {
         isOpen={showAddPlantModal}
         onClose={() => setShowAddPlantModal(false)}
         onAddPlant={handleAddPlant}
+      />
+
+      {/* PWA App Download & Install Modal */}
+      <InstallAppModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+        onInstallClick={handleNativeInstall}
+        hasNativePrompt={!!installPrompt}
       />
     </div>
   );

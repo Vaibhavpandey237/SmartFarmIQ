@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, Activity, ShoppingCart, TrendingUp, Leaf, 
   ChevronDown, ChevronUp, MessageSquare, History, Bell, ShieldCheck,
-  Layers
+  Layers, Download
 } from 'lucide-react';
 
 export default function NavigationTabs({
@@ -13,7 +13,8 @@ export default function NavigationTabs({
   remindersCount,
   moreDropdownOpen,
   setMoreDropdownOpen,
-  mobileMenuOpen
+  mobileMenuOpen,
+  onOpenInstallModal
 }) {
   const isMoreTabActive = ['chat', 'history', 'reminders', 'admin'].includes(activeTab);
 
@@ -49,6 +50,14 @@ export default function NavigationTabs({
           </button>
           <button className={`tab-btn ${activeTab === 'reminders' ? 'active' : ''}`} onClick={() => onTabClick('reminders')}>
             <Bell size={18} /> Reminders ({remindersCount})
+          </button>
+          <button 
+            type="button" 
+            className="tab-btn" 
+            onClick={onOpenInstallModal}
+            style={{ color: 'var(--accent-green)', fontWeight: 700 }}
+          >
+            <Download size={18} /> 📲 Install / Download App
           </button>
           {user?.role === 'ADMIN' && (
             <button className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => onTabClick('admin')}>
@@ -101,6 +110,14 @@ export default function NavigationTabs({
               </button>
               <button className={`dropdown-item ${activeTab === 'reminders' ? 'active' : ''}`} onClick={() => onTabClick('reminders')}>
                 <Bell size={16} /> Reminders ({remindersCount})
+              </button>
+              <button 
+                type="button"
+                className="dropdown-item" 
+                onClick={onOpenInstallModal}
+                style={{ color: 'var(--accent-green)', fontWeight: 700 }}
+              >
+                <Download size={16} /> 📲 Install App
               </button>
               {user?.role === 'ADMIN' && (
                 <button className={`dropdown-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => onTabClick('admin')}>

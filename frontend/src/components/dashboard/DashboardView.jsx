@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Activity, MessageSquare, Plus, Bell, Download, 
-  Layers, TrendingUp, ShoppingCart, Sparkles, Sprout, ArrowRight, CheckCircle2 
+  Layers, TrendingUp, ShoppingCart, Sparkles, Sprout, ArrowRight, CheckCircle2, Smartphone 
 } from 'lucide-react';
 
 export default function DashboardView({
@@ -10,7 +10,8 @@ export default function DashboardView({
   plantProfiles,
   reminders,
   onTabClick,
-  onOpenAddPlant
+  onOpenAddPlant,
+  onOpenInstallModal
 }) {
   return (
     <main style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
@@ -109,6 +110,15 @@ export default function DashboardView({
           </button>
           <button className="btn-secondary" style={{ padding: '0.85rem', justifyContent: 'center' }} onClick={() => onTabClick('reminders')}>
             <Bell size={18} color="#F59E0B" /> Check Reminders
+          </button>
+          <button 
+            type="button"
+            className="btn-secondary" 
+            style={{ padding: '0.85rem', justifyContent: 'center', borderColor: 'rgba(16, 185, 129, 0.4)', color: 'var(--accent-green)' }} 
+            onClick={onOpenInstallModal}
+          >
+            <Smartphone size={18} color="var(--accent-green)" /> 
+            <span>Download / Install App</span>
           </button>
         </div>
       </section>

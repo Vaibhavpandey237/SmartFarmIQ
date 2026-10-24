@@ -1,0 +1,54 @@
+{
+  "name": "Smart Farm IQ — AI Agricultural Assistant",
+  "short_name": "SmartFarmIQ",
+  "description": "AI-Powered Plant Disease Detection, SoilSense AI & Smart Agricultural Assistant",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B1315",
+  "theme_color": "#10B981",
+  "lang": "en",
+  "categories": ["agriculture", "education", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/sprout.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "SoilSense AI",
+      "short_name": "SoilSense",
+      "description": "Scan soil and get crop recommendations",
+      "url": "/#soilsense",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Diagnosis",
+      "short_name": "Diagnose",
+      "description": "Diagnose crop leaf diseases",
+      "url": "/#diagnose",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
