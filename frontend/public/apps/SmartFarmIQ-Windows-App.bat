@@ -1,12 +1,14 @@
 @echo off
-title Smart Farm IQ - Desktop App Installer
+title Smart Farm IQ - Desktop App Launcher
 color 0A
 echo ========================================================
 echo       SMART FARM IQ - AI AGRICULTURAL ASSISTANT
 echo ========================================================
 echo.
-echo Installing Smart Farm IQ Standalone Desktop App...
+echo Launching Smart Farm IQ Standalone Desktop App...
 echo.
+
+set APP_URL=https://plant-care-ai-gules.vercel.app
 
 set BROWSER=
 if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
@@ -20,17 +22,17 @@ if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
 )
 
 if "%BROWSER%"=="" (
-    echo [ERROR] Chrome or Edge browser not found! Opening default browser...
-    start http://localhost:5174/
+    echo [INFO] Opening default browser...
+    start %APP_URL%
     exit /b
 )
 
 echo Creating Desktop App Shortcut on your Windows Desktop...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('Desktop'); $s = $ws.CreateShortcut([System.IO.Path]::Combine($d, 'Smart Farm IQ.lnk')); $s.TargetPath = '%BROWSER%'; $s.Arguments = '--app=http://localhost:5174/ --window-size=1280,840'; $s.Description = 'Smart Farm IQ - AI Plant & Soil Platform'; $s.Save()"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('Desktop'); $s = $ws.CreateShortcut([System.IO.Path]::Combine($d, 'Smart Farm IQ.lnk')); $s.TargetPath = '%BROWSER%'; $s.Arguments = '--app=%APP_URL% --window-size=1280,840'; $s.Description = 'Smart Farm IQ - AI Agricultural Platform'; $s.Save()"
 
 echo.
-echo [SUCCESS] Smart Farm IQ Desktop Shortcut created successfully on your Desktop!
+echo [SUCCESS] Smart Farm IQ Desktop Shortcut created on your Desktop!
 echo Launching standalone app window now...
-start "" "%BROWSER%" --app=http://localhost:5174/ --window-size=1280,840
+start "" "%BROWSER%" --app=%APP_URL% --window-size=1280,840
 timeout /t 3 >nul
 exit

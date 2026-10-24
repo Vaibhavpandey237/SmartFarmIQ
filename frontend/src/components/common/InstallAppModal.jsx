@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
-import { Download, Smartphone, Monitor, Apple, Check, X, Sparkles, FolderArchive, ArrowDownToLine, CheckCircle2 } from 'lucide-react';
+import { 
+  Download, 
+  Smartphone, 
+  Monitor, 
+  Apple, 
+  Check, 
+  X, 
+  Sparkles, 
+  CheckCircle2, 
+  MoreVertical, 
+  PlusSquare, 
+  ShieldCheck,
+  ArrowRight,
+  Info
+} from 'lucide-react';
 
 export default function InstallAppModal({ isOpen, onClose, onInstallClick, hasNativePrompt }) {
   const [activePlatform, setActivePlatform] = useState(() => {
     if (typeof navigator !== 'undefined') {
-      if (navigator.userAgent.includes('Android')) return 'android';
-      if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) return 'ios';
+      const ua = navigator.userAgent || '';
+      if (/Android/i.test(ua)) return 'android';
+      if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
     }
-    return 'pc';
+    return 'android';
   });
 
+  const [promptAttempted, setPromptAttempted] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   if (!isOpen) return null;
@@ -25,21 +41,14 @@ export default function InstallAppModal({ isOpen, onClose, onInstallClick, hasNa
     setTimeout(() => setDownloadSuccess(false), 5000);
   };
 
-  const handlePrimaryInstall = () => {
-    // 1. Try native PWA install prompt if browser supports it
-    if (onInstallClick) {
+  const handleInstallClick = async () => {
+    setPromptAttempted(true);
+    if (hasNativePrompt && onInstallClick) {
       try {
-        onInstallClick();
-      } catch (e) {}
-    }
-
-    // 2. Start direct file download according to platform
-    if (activePlatform === 'android') {
-      triggerDownload('/apps/SmartFarmIQ-Android-App.apk', 'SmartFarmIQ-Android-App.apk');
-    } else if (activePlatform === 'pc') {
-      triggerDownload('/apps/SmartFarmIQ-Windows-App.bat', 'SmartFarmIQ-Windows-App.bat');
-    } else {
-      triggerDownload('/apps/SmartFarmIQ-App-Package.zip', 'SmartFarmIQ-App-Package.zip');
+        await onInstallClick();
+      } catch (e) {
+        console.warn('Native prompt error:', e);
+      }
     }
   };
 
@@ -50,7 +59,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstallClick, hasNa
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(5, 10, 15, 0.8)',
+      background: 'rgba(5, 10, 15, 0.85)',
       backdropFilter: 'blur(10px)',
       display: 'flex',
       alignItems: 'center',
@@ -62,14 +71,17 @@ export default function InstallAppModal({ isOpen, onClose, onInstallClick, hasNa
         className="card" 
         onClick={(e) => e.stopPropagation()} 
         style={{
-          maxWidth: '540px',
+          maxWidth: '560px',
           width: '100%',
-          background: 'var(--bg-card)',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          background: 'var(--bg-card, #0B1315)',
           border: '1px solid rgba(16, 185, 129, 0.35)',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6)',
-          borderRadius: '18px',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+          borderRadius: '20px',
           padding: '1.75rem',
-          position: 'relative'
+          position: 'relative',
+          color: 'var(--text-main, #ECFDF5)'
         }}
       >
         {/* Close Button */}
@@ -79,146 +91,56 @@ export default function InstallAppModal({ isOpen, onClose, onInstallClick, hasNa
             position: 'absolute',
             top: '1rem',
             right: '1rem',
-            background: 'transparent',
+            background: 'rgba(255, 255, 255, 0.06)',
             border: 'none',
-            color: 'var(--text-muted)',
+            borderRadius: '50%',
+            color: 'var(--text-muted, #94A3B8)',
             cursor: 'pointer',
-            padding: '6px'
+            padding: '7px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           title="Close"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
           <div style={{
-            width: '54px',
-            height: '54px',
-            borderRadius: '14px',
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
             background: 'linear-gradient(135deg, #10B981, #059669)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.45)',
             flexShrink: 0
           }}>
-            <Smartphone size={30} color="#FFFFFF" />
+            <Smartphone size={32} color="#FFFFFF" />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Download Smart Farm IQ App</h3>
-              <span style={{ fontSize: '0.65rem', background: '#10B981', color: '#fff', padding: '2px 7px', borderRadius: '10px', fontWeight: 800 }}>APP</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                Smart Farm IQ App
+              </h3>
+              <span style={{ 
+                fontSize: '0.68rem', 
+                background: 'linear-gradient(135deg, #10B981, #047857)', 
+                color: '#fff', 
+                padding: '2px 8px', 
+                borderRadius: '12px', 
+                fontWeight: 800,
+                letterSpacing: '0.05em'
+              }}>
+                OFFICIAL APP
+              </span>
             </div>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
-              Install direct app on Android Phone, Windows Desktop, or iPhone.
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted, #94A3B8)', margin: '3px 0 0 0' }}>
+              Install directly on your Android phone, Windows PC, or iPhone.
             </p>
-          </div>
-        </div>
-
-        {/* Primary Download & Install Button */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <button 
-            type="button"
-            className="btn-primary" 
-            onClick={handlePrimaryInstall}
-            style={{
-              width: '100%',
-              padding: '0.9rem',
-              fontSize: '1.05rem',
-              fontWeight: 800,
-              justifyContent: 'center',
-              boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <Download size={22} /> 1-Click Download & Install App Now
-          </button>
-          
-          {downloadSuccess && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              color: '#10B981',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              marginTop: '0.6rem',
-              background: 'rgba(16, 185, 129, 0.12)',
-              padding: '0.4rem',
-              borderRadius: '8px'
-            }}>
-              <CheckCircle2 size={16} /> App installer downloaded! Check your browser downloads folder.
-            </div>
-          )}
-        </div>
-
-        {/* Direct Download Options Box */}
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.25)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '12px',
-          padding: '0.9rem',
-          marginBottom: '1.25rem'
-        }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.6rem' }}>
-            Direct Download Options:
-          </span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.6rem' }}>
-            <a 
-              href="/apps/SmartFarmIQ-Windows-App.bat"
-              download="SmartFarmIQ-Windows-App.bat"
-              onClick={() => setDownloadSuccess(true)}
-              className="btn-secondary"
-              style={{
-                fontSize: '0.8rem',
-                padding: '0.55rem',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                borderColor: 'rgba(59, 130, 246, 0.4)',
-                color: '#60A5FA'
-              }}
-            >
-              <Monitor size={15} /> Windows App (.bat)
-            </a>
-
-            <a 
-              href="/apps/SmartFarmIQ-Android-App.apk"
-              download="SmartFarmIQ-Android-App.apk"
-              onClick={() => setDownloadSuccess(true)}
-              className="btn-secondary"
-              style={{
-                fontSize: '0.8rem',
-                padding: '0.55rem',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                borderColor: 'rgba(16, 185, 129, 0.4)',
-                color: '#34D399'
-              }}
-            >
-              <Smartphone size={15} /> Android App (.apk)
-            </a>
-
-            <a 
-              href="/apps/SmartFarmIQ-App-Package.zip"
-              download="SmartFarmIQ-App-Package.zip"
-              onClick={() => setDownloadSuccess(true)}
-              className="btn-secondary"
-              style={{
-                fontSize: '0.8rem',
-                padding: '0.55rem',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                borderColor: 'rgba(168, 85, 247, 0.4)',
-                color: '#C084FC'
-              }}
-            >
-              <FolderArchive size={15} /> Full Package (.zip)
-            </a>
           </div>
         </div>
 
@@ -226,124 +148,402 @@ export default function InstallAppModal({ isOpen, onClose, onInstallClick, hasNa
         <div style={{
           display: 'flex',
           gap: '0.4rem',
-          background: 'rgba(0, 0, 0, 0.25)',
-          padding: '4px',
-          borderRadius: '10px',
-          marginBottom: '1rem'
+          background: 'rgba(0, 0, 0, 0.35)',
+          padding: '5px',
+          borderRadius: '12px',
+          marginBottom: '1.25rem',
+          border: '1px solid rgba(255, 255, 255, 0.05)'
         }}>
           <button 
             type="button"
-            onClick={() => setActivePlatform('pc')}
+            onClick={() => { setActivePlatform('android'); setPromptAttempted(false); }}
             style={{
               flex: 1,
-              padding: '0.5rem',
-              borderRadius: '8px',
+              padding: '0.6rem 0.5rem',
+              borderRadius: '9px',
               border: 'none',
-              background: activePlatform === 'pc' ? 'var(--accent-green)' : 'transparent',
-              color: activePlatform === 'pc' ? '#fff' : 'var(--text-muted)',
+              background: activePlatform === 'android' ? 'var(--accent-green, #10B981)' : 'transparent',
+              color: activePlatform === 'android' ? '#fff' : 'var(--text-muted, #94A3B8)',
               fontWeight: 700,
-              fontSize: '0.82rem',
+              fontSize: '0.84rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px'
+              gap: '6px',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Monitor size={15} /> Windows / PC
+            <Smartphone size={16} /> Android Phone
           </button>
+
           <button 
             type="button"
-            onClick={() => setActivePlatform('android')}
+            onClick={() => { setActivePlatform('pc'); setPromptAttempted(false); }}
             style={{
               flex: 1,
-              padding: '0.5rem',
-              borderRadius: '8px',
+              padding: '0.6rem 0.5rem',
+              borderRadius: '9px',
               border: 'none',
-              background: activePlatform === 'android' ? 'var(--accent-green)' : 'transparent',
-              color: activePlatform === 'android' ? '#fff' : 'var(--text-muted)',
+              background: activePlatform === 'pc' ? 'var(--accent-green, #10B981)' : 'transparent',
+              color: activePlatform === 'pc' ? '#fff' : 'var(--text-muted, #94A3B8)',
               fontWeight: 700,
-              fontSize: '0.82rem',
+              fontSize: '0.84rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px'
+              gap: '6px',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Smartphone size={15} /> Android
+            <Monitor size={16} /> Windows PC
           </button>
+
           <button 
             type="button"
-            onClick={() => setActivePlatform('ios')}
+            onClick={() => { setActivePlatform('ios'); setPromptAttempted(false); }}
             style={{
               flex: 1,
-              padding: '0.5rem',
-              borderRadius: '8px',
+              padding: '0.6rem 0.5rem',
+              borderRadius: '9px',
               border: 'none',
-              background: activePlatform === 'ios' ? 'var(--accent-green)' : 'transparent',
-              color: activePlatform === 'ios' ? '#fff' : 'var(--text-muted)',
+              background: activePlatform === 'ios' ? 'var(--accent-green, #10B981)' : 'transparent',
+              color: activePlatform === 'ios' ? '#fff' : 'var(--text-muted, #94A3B8)',
               fontWeight: 700,
-              fontSize: '0.82rem',
+              fontSize: '0.84rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px'
+              gap: '6px',
+              transition: 'all 0.2s ease'
             }}
           >
-            <Apple size={15} /> iPhone
+            <Apple size={16} /> iPhone (iOS)
           </button>
         </div>
 
-        {/* Step-by-Step Instructions */}
-        <div style={{
-          background: 'rgba(16, 185, 129, 0.05)',
-          border: '1px solid rgba(16, 185, 129, 0.15)',
-          borderRadius: '12px',
-          padding: '0.85rem',
-          fontSize: '0.82rem',
-          lineHeight: '1.6'
-        }}>
-          {activePlatform === 'pc' && (
-            <div>
+        {/* ANDROID VIEW */}
+        {activePlatform === 'android' && (
+          <div>
+            {/* Primary Action Button */}
+            <button 
+              type="button"
+              className="btn-primary" 
+              onClick={handleInstallClick}
+              style={{
+                width: '100%',
+                padding: '0.95rem',
+                fontSize: '1.05rem',
+                fontWeight: 800,
+                justifyContent: 'center',
+                boxShadow: '0 8px 25px rgba(16, 185, 129, 0.45)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '9px',
+                borderRadius: '12px',
+                marginBottom: '1rem',
+                background: 'linear-gradient(135deg, #10B981, #059669)',
+                color: '#FFFFFF'
+              }}
+            >
+              <Smartphone size={22} /> {hasNativePrompt ? 'Tap to Install App on Android' : 'Install Smart Farm IQ App'}
+            </button>
+
+            {/* Why WebAPK explanation note */}
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: '12px',
+              padding: '0.85rem 1rem',
+              marginBottom: '1.1rem',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px'
+            }}>
+              <ShieldCheck size={20} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ fontSize: '0.82rem', lineHeight: '1.5' }}>
+                <strong style={{ color: '#34D399', display: 'block', marginBottom: '2px' }}>
+                  No Parse Error / 100% Genuine Android App:
+                </strong>
+                Android me Google Chrome direct official <strong>WebAPK</strong> install karta hai. Kisi corrupted ya third-party .apk ki zaroorat nahi hai.
+              </div>
+            </div>
+
+            {/* Step-by-Step Native Chrome Guide */}
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '14px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <span style={{ 
+                fontSize: '0.78rem', 
+                fontWeight: 800, 
+                color: '#34D399', 
+                textTransform: 'uppercase', 
+                display: 'block', 
+                marginBottom: '0.75rem',
+                letterSpacing: '0.04em'
+              }}>
+                📲 Mobile Me Install Karne Ka Sabse Asan Tarika (Chrome):
+              </span>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {/* Step 1 */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>1</div>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Chrome browser ke top-right me <strong>Three Dots ( <MoreVertical size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> ⋮ )</strong> par tap karein.
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>2</div>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Menu me <strong>"Install app"</strong> ya <strong>"Add to Home screen"</strong> (ऐप इंस्टॉल करें) par tap karein.
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>3</div>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Popup aane par <strong>"Install"</strong> dabayein — App aapke Android phone ke app drawer me bina kisi parse error ke turant install ho jayegi!
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.78rem',
+              color: 'var(--text-muted, #94A3B8)',
+              background: 'rgba(255, 255, 255, 0.03)',
+              padding: '0.6rem 0.8rem',
+              borderRadius: '10px'
+            }}>
+              <CheckCircle2 size={16} color="#10B981" />
+              <span>Full screen offline support & camera access for leaf disease scanning</span>
+            </div>
+          </div>
+        )}
+
+        {/* WINDOWS PC VIEW */}
+        {activePlatform === 'pc' && (
+          <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1.25rem' }}>
+              {/* Bat Launcher Button */}
+              <button 
+                type="button"
+                className="btn-primary" 
+                onClick={() => triggerDownload('/apps/SmartFarmIQ-Windows-App.bat', 'SmartFarmIQ-Windows-App.bat')}
+                style={{
+                  width: '100%',
+                  padding: '0.9rem',
+                  fontSize: '1rem',
+                  fontWeight: 800,
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 25px rgba(59, 130, 246, 0.35)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)'
+                }}
+              >
+                <Download size={20} /> Download Windows App Launcher (.bat)
+              </button>
+
+              {hasNativePrompt && (
+                <button 
+                  type="button"
+                  className="btn-secondary" 
+                  onClick={handleInstallClick}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    borderRadius: '12px',
+                    borderColor: 'rgba(16, 185, 129, 0.4)',
+                    color: '#34D399'
+                  }}
+                >
+                  <Sparkles size={18} /> Install as Chrome/Edge App
+                </button>
+              )}
+            </div>
+
+            {downloadSuccess && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                color: '#60A5FA',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                marginBottom: '1rem',
+                background: 'rgba(59, 130, 246, 0.12)',
+                padding: '0.5rem',
+                borderRadius: '8px'
+              }}>
+                <CheckCircle2 size={16} /> Launcher downloaded! Double-click to create Desktop shortcut.
+              </div>
+            )}
+
+            <div style={{
+              background: 'rgba(59, 130, 246, 0.05)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: '12px',
+              padding: '0.9rem',
+              fontSize: '0.82rem',
+              lineHeight: '1.6'
+            }}>
               <p style={{ fontWeight: 700, color: '#60A5FA', margin: '0 0 0.4rem 0' }}>
-                💻 Windows Desktop App Installation:
+                💻 Windows PC Installation Steps:
               </p>
               <ol style={{ paddingLeft: '1.25rem', margin: 0 }}>
-                <li>Upar diye gaye <strong>"Windows App (.bat)"</strong> button par click karke file download karein.</li>
+                <li>Upar diye gaye <strong>"Download Windows App Launcher (.bat)"</strong> button par click karein.</li>
                 <li>Downloaded file <strong>SmartFarmIQ-Windows-App.bat</strong> par double-click karein.</li>
                 <li>Aapke Windows Desktop par <strong>Smart Farm IQ</strong> ka standalone app shortcut ban jayega!</li>
               </ol>
             </div>
-          )}
+          </div>
+        )}
 
-          {activePlatform === 'android' && (
-            <div>
-              <p style={{ fontWeight: 700, color: 'var(--accent-green)', margin: '0 0 0.4rem 0' }}>
-                📱 Android Phone Installation:
-              </p>
-              <ol style={{ paddingLeft: '1.25rem', margin: 0 }}>
-                <li>Upar <strong>"Android App (.apk)"</strong> download karein ya browser me <strong>Three Dots (⋮)</strong> dabayein.</li>
-                <li>Menu me <strong>"Install app"</strong> ya <strong>"Add to Home screen"</strong> par tap karein.</li>
-                <li>App aapke phone ke app drawer me bina Play Store ke install ho jayegi!</li>
-              </ol>
-            </div>
-          )}
+        {/* IOS (IPHONE) VIEW */}
+        {activePlatform === 'ios' && (
+          <div>
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: '14px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <span style={{ 
+                fontSize: '0.78rem', 
+                fontWeight: 800, 
+                color: 'var(--accent-green, #10B981)', 
+                textTransform: 'uppercase', 
+                display: 'block', 
+                marginBottom: '0.75rem',
+                letterSpacing: '0.04em'
+              }}>
+                🍏 iPhone (Safari) Me App Kaise Lagayein:
+              </span>
 
-          {activePlatform === 'ios' && (
-            <div>
-              <p style={{ fontWeight: 700, color: 'var(--accent-green)', margin: '0 0 0.4rem 0' }}>
-                🍏 iPhone (Safari) Installation:
-              </p>
-              <ol style={{ paddingLeft: '1.25rem', margin: 0 }}>
-                <li>Safari browser me niche bottom bar par <strong>Share icon (⬆️)</strong> dabayein.</li>
-                <li>Scroll karke <strong>"Add to Home Screen"</strong> par tap karein.</li>
-                <li>Home screen par Smart Farm IQ app icon ban jayega!</li>
-              </ol>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>1</div>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Safari browser me niche bottom bar par <strong>Share icon (⬆️)</strong> dabayein.
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>2</div>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Niche scroll karke <strong>"Add to Home Screen"</strong> (+ icon) par tap karein.
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>3</div>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    Top right me <strong>"Add"</strong> dabayein — App seedhe aapke iPhone screen par ban jayegi!
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
