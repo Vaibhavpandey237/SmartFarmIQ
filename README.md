@@ -1,7 +1,7 @@
 # 🌱 Smart Farm IQ — Intelligent Plant Disease Detection & Smart Agricultural Assistant
 
 <p align="center">
-  <a href="https://plant-care-ai-phi.vercel.app" target="_blank">
+  <a href="https://plant-care-ai-gules.vercel.app" target="_blank">
     <img src="https://img.shields.io/badge/🌱%20Live%20Demo-Vercel-success?style=for-the-badge" alt="Live Demo" />
   </a>
 </p>
