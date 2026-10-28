@@ -75,6 +75,12 @@ export default function App() {
   const [reminders, setReminders] = useState(INITIAL_REMINDERS);
   const [showAddPlantModal, setShowAddPlantModal] = useState(false);
   const [lastDiagnosisResult, setLastDiagnosisResult] = useState(null);
+  const [pendingDiagnosisFile, setPendingDiagnosisFile] = useState(null);
+
+  const handleSwitchToDiagnosis = (file) => {
+    setPendingDiagnosisFile(file || null);
+    handleTabClick('diagnose');
+  };
 
   // PWA Install State
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -244,10 +250,18 @@ export default function App() {
             setLastDiagnosisResult(res);
             loadHistory();
           }} 
+          initialFile={pendingDiagnosisFile}
+          onClearInitialFile={() => setPendingDiagnosisFile(null)}
         />
       )}
 
-      {activeTab === 'soilsense' && <SoilSenseView user={user} />}
+      {activeTab === 'soilsense' && (
+        <SoilSenseView 
+          user={user} 
+          onTabClick={handleTabClick}
+          onSwitchToDiagnosis={handleSwitchToDiagnosis}
+        />
+      )}
 
       {activeTab === 'store' && <ProductsStoreView />}
 

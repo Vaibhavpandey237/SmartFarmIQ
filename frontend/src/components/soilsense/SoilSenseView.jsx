@@ -12,7 +12,7 @@ import FarmProfileManager from './FarmProfileManager';
 import SoilReportModal from './SoilReportModal';
 import { fetchSoilScanHistory, saveSoilScanRecord, clearSoilScanHistory } from '../../services/api.js';
 
-export default function SoilSenseView({ user }) {
+export default function SoilSenseView({ user, onTabClick, onSwitchToDiagnosis }) {
   // Navigation Sub-tab inside SoilSense AI
   const [activeSubTab, setActiveSubTab] = useState('scanner'); // 'scanner' | 'recommendations' | 'guide' | 'history'
 
@@ -67,10 +67,10 @@ export default function SoilSenseView({ user }) {
 
   const handleScanComplete = (scanResult) => {
     setCurrentScanResult(scanResult);
-    if (scanResult.predictedGroup) {
+    if (scanResult && scanResult.predictedGroup) {
       setSelectedSoilGroup(scanResult.predictedGroup);
     }
-    if (scanResult.estimatedTexture) {
+    if (scanResult && scanResult.estimatedTexture) {
       setSelectedSoilTexture(scanResult.estimatedTexture);
     }
   };
@@ -276,6 +276,7 @@ export default function SoilSenseView({ user }) {
               onScanComplete={handleScanComplete} 
               externalFile={externalFile}
               onClearExternalFile={() => setExternalFile(null)}
+              onSwitchToDiagnosis={onSwitchToDiagnosis}
             />
 
             {currentScanResult && (

@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Camera, Upload, RefreshCw, AlertCircle, CheckCircle2, 
-  Sparkles, X, Eye, HelpCircle, Layers, ShieldAlert 
+  Sparkles, X, Eye, HelpCircle, Layers, ShieldAlert, Sprout, ArrowRight, UserX, AlertTriangle
 } from 'lucide-react';
 import { analyzeSoilImage } from '../../services/api.js';
 
-export default function SoilScanner({ onScanComplete, externalFile, onClearExternalFile }) {
+export default function SoilScanner({ onScanComplete, externalFile, onClearExternalFile, onSwitchToDiagnosis }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [validationError, setValidationError] = useState(null);
   const [warningMsg, setWarningMsg] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
@@ -57,6 +58,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
   const handleFile = (file) => {
     if (!file) return;
     setErrorMsg('');
+    setValidationError(null);
     setWarningMsg('');
 
     if (!file.type.startsWith('image/')) {
@@ -78,6 +80,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
 
   const handleDemoSelect = async (demo) => {
     setErrorMsg('');
+    setValidationError(null);
     setWarningMsg('');
     try {
       setAnalyzing(true);
@@ -97,6 +100,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
   // Device Camera Access
   const startCamera = async () => {
     setErrorMsg('');
+    setValidationError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
@@ -107,7 +111,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
-      setErrorMsg('Unable to access device camera. Please check camera permissions or upload an image from your device.');
+      setErrorMsg('Could not open device camera. Please check camera permissions or upload a local file.');
       setCameraActive(false);
     }
   };
@@ -124,8 +128,10 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
       if (blob) {
         const file = new File([blob], `soil_capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
         setSelectedFile(file);
-        setPreviewUrl(URL.createObjectURL(blob));
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
         stopCamera();
+        runAnalysis(file, url);
       }
     }, 'image/jpeg', 0.92);
   };
@@ -142,10 +148,14 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
     setSelectedFile(null);
     setPreviewUrl(null);
     setErrorMsg('');
+    setValidationError(null);
     setWarningMsg('');
     stopCamera();
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+    if (onScanComplete) {
+      onScanComplete(null);
     }
   };
 
@@ -153,6 +163,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
     if (!fileToAnalyze) return;
     setAnalyzing(true);
     setErrorMsg('');
+    setValidationError(null);
     setWarningMsg('');
 
     try {
@@ -167,7 +178,22 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
         });
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Image processing failed. Please ensure the photograph clearly shows soil surface clods under natural light.');
+      // Clear any previous valid results
+      if (onScanComplete) {
+        onScanComplete(null);
+      }
+
+      const code = err.code || 'VALIDATION_FAILED';
+      const msg = err.customMessage || err.message || 'Image processing failed.';
+      const sub = err.subMessage || 'Please ensure the photograph clearly shows agricultural soil under natural daylight.';
+
+      setValidationError({
+        code,
+        message: msg,
+        subMessage: sub,
+        suggestionTab: err.suggestionTab || null
+      });
+      setErrorMsg(msg);
     } finally {
       setAnalyzing(false);
     }
@@ -175,16 +201,170 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
 
   return (
     <div id="soil-scanner-section" className="soil-scanner-wrapper">
-      {/* ERROR BANNER */}
-      {errorMsg && (
+      {/* 🌿 DEDICATED PLANT LEAF REJECTION BANNER */}
+      {validationError && validationError.code === 'PLANT_LEAF_DETECTED' && (
+        <div 
+          className="alert-box" 
+          style={{ 
+            marginBottom: '1.5rem', 
+            background: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            borderLeft: '5px solid #10B981',
+            borderRadius: '12px',
+            padding: '1.25rem',
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'flex-start'
+          }}
+        >
+          <div style={{ 
+            background: 'rgba(16, 185, 129, 0.2)', 
+            borderRadius: '50%', 
+            padding: '8px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Sprout size={24} style={{ color: '#10B981' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <strong style={{ fontSize: '1.05rem', color: '#10B981', fontWeight: 700 }}>
+                🌿 {validationError.message}
+              </strong>
+              <span style={{ 
+                fontSize: '0.72rem', 
+                background: '#EF4444', 
+                color: '#FFF', 
+                padding: '2px 8px', 
+                borderRadius: '6px', 
+                fontWeight: 600,
+                letterSpacing: '0.3px'
+              }}>
+                SoilSense: केवल मिट्टी मान्य है (Only Soil Allowed)
+              </span>
+            </div>
+            
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginTop: '0.45rem', lineHeight: 1.55 }}>
+              {validationError.subMessage}
+            </p>
+
+            <div style={{ 
+              marginTop: '0.75rem', 
+              padding: '0.65rem 0.85rem', 
+              background: 'rgba(0, 0, 0, 0.15)', 
+              borderRadius: '8px', 
+              fontSize: '0.82rem',
+              color: 'var(--text-muted)'
+            }}>
+              💡 <strong>नोट:</strong> पत्ती के रोग (जैसे अगेती झुलसा, धब्बा रोग, कीट क्षति) का सटीक इलाज जानने के लिए हमारे <strong>Plant Disease Diagnosis</strong> मॉडल का प्रयोग करें।
+            </div>
+
+            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {onSwitchToDiagnosis && (
+                <button 
+                  type="button" 
+                  className="btn-primary"
+                  style={{ 
+                    background: '#10B981', 
+                    borderColor: '#10B981', 
+                    padding: '0.6rem 1.25rem', 
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onClick={() => onSwitchToDiagnosis(selectedFile)}
+                >
+                  <Sprout size={18} />
+                  <span>पौधे की बीमारी जांचें (Open Plant Disease Diagnosis)</span>
+                  <ArrowRight size={16} />
+                </button>
+              )}
+              <button 
+                type="button" 
+                className="btn-secondary"
+                style={{ padding: '0.6rem 1.1rem', fontSize: '0.88rem' }}
+                onClick={handleReset}
+              >
+                <RefreshCw size={14} style={{ marginRight: '6px' }} />
+                मिट्टी की फोटो अपलोड करें (Upload Soil Photo)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 👤 HUMAN / PORTRAIT REJECTION BANNER */}
+      {validationError && validationError.code === 'HUMAN_DETECTED' && (
+        <div 
+          className="alert-box alert-error" 
+          style={{ 
+            marginBottom: '1.5rem', 
+            borderLeft: '5px solid #EF4444', 
+            borderRadius: '12px', 
+            padding: '1.25rem' 
+          }}
+        >
+          <UserX size={26} style={{ flexShrink: 0, color: '#EF4444' }} />
+          <div style={{ flex: 1 }}>
+            <strong style={{ fontSize: '1rem', color: '#EF4444' }}>
+              👤 {validationError.message}
+            </strong>
+            <p style={{ fontSize: '0.88rem', marginTop: '0.35rem' }}>
+              {validationError.subMessage}
+            </p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <button type="button" className="btn-secondary" onClick={handleReset}>
+                <RefreshCw size={14} style={{ marginRight: '6px' }} />
+                खेत की मिट्टी की फोटो अपलोड करें (Upload Soil Photo)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ⚠️ GENERIC / NON-SOIL REJECTION BANNER */}
+      {validationError && !['PLANT_LEAF_DETECTED', 'HUMAN_DETECTED'].includes(validationError.code) && (
+        <div 
+          className="alert-box alert-error" 
+          style={{ 
+            marginBottom: '1.5rem', 
+            borderLeft: '5px solid #F59E0B', 
+            borderRadius: '12px', 
+            padding: '1.25rem' 
+          }}
+        >
+          <AlertTriangle size={24} style={{ flexShrink: 0, color: '#F59E0B' }} />
+          <div style={{ flex: 1 }}>
+            <strong style={{ fontSize: '1rem', color: '#F59E0B' }}>
+              ⚠️ {validationError.message}
+            </strong>
+            <p style={{ fontSize: '0.88rem', marginTop: '0.35rem' }}>
+              {validationError.subMessage}
+            </p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+              💡 सुझाव: कैमरे को ज़मीन या गमले की मिट्टी से 15–30 सेमी की दूरी पर रखें और प्राकृतिक रोशनी में स्पष्ट फोटो लें।
+            </p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <button type="button" className="btn-secondary" onClick={handleReset}>
+                <RefreshCw size={14} style={{ marginRight: '6px' }} />
+                पुनः प्रयास करें (Try Again with Soil Photo)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FALLBACK ERROR BANNER (Only if no structured validationError) */}
+      {errorMsg && !validationError && (
         <div className="alert-box alert-error" style={{ marginBottom: '1.25rem' }}>
           <AlertCircle size={20} style={{ flexShrink: 0 }} />
           <div>
             <strong>Image Validation Notice</strong>
             <p style={{ fontSize: '0.88rem', marginTop: '0.25rem' }}>{errorMsg}</p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-              Tip: Photograph soil at 20–30 cm distance in open natural daylight. Clear away large stones, plant branches, or debris.
-            </p>
           </div>
         </div>
       )}
@@ -224,6 +404,25 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
       {/* MAIN UPLOAD / DROPZONE */}
       {!cameraActive && (
         <div className="soil-dropzone-container">
+          {/* Soil Only Quality Header Badge */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '0.6rem',
+            padding: '0.4rem 0.8rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)',
+            fontSize: '0.8rem',
+            color: 'var(--text-muted)'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, color: 'var(--accent-teal)' }}>
+              <Layers size={14} /> Strict Soil Optical Filter Active
+            </span>
+            <span>केवल मिट्टी (Soil Only) • Leaves, faces & non-soil auto-rejected</span>
+          </div>
+
           <div
             className={`dropzone soil-dropzone ${dragActive ? 'drag-active' : ''} ${previewUrl ? 'has-preview' : ''}`}
             onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -264,10 +463,10 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
                   <Layers size={32} color="var(--accent-teal)" />
                 </div>
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginTop: '0.75rem' }}>
-                  Capture or Upload Soil Photograph
+                  Capture or Upload Soil Photograph (मिट्टी की फोटो)
                 </h4>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '420px', margin: '0.35rem auto 1rem' }}>
-                  Drag & drop soil photo here, or use device camera. Supports PNG, JPG, WEBP up to 10MB.
+                  Drag & drop soil photo here, or use device camera. SoilSense strictly accepts agricultural soil, sand, clay, or field dirt.
                 </p>
                 <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <button 
@@ -301,7 +500,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
                 {analyzing ? (
                   <>
                     <RefreshCw size={20} className="spin" />
-                    <span>Analyzing Soil Aggregate & Reflectance...</span>
+                    <span>Analyzing Soil Aggregate & Minerals...</span>
                   </>
                 ) : (
                   <>
@@ -318,7 +517,7 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
             <div className="scanning-progress-box">
               <div className="scan-radar-line"></div>
               <p style={{ fontSize: '0.85rem', color: 'var(--accent-teal)', fontWeight: 600, marginTop: '0.5rem' }}>
-                🔬 Extracting color matrix • Evaluating particle granularity • Calibrating optical confidence...
+                🔬 Verifying authentic soil minerals • Evaluating particle granularity • Calibrating optical confidence...
               </p>
             </div>
           )}

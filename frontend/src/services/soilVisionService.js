@@ -1,11 +1,15 @@
 /**
- * SoilSense AI — Optical Soil Vision & Image Pre-processing Service
- * Performs client-side image validation, sharpness checking, non-soil rejection,
- * and calibrated surface reflectance & texture analysis.
+ * SoilSense AI — Optical Soil Vision & Strict Non-Soil Rejection Service
  *
- * Adheres strictly to scientific responsibility:
- * Calibrated against ICAR & NBSS&LUP soil survey benchmarks, separates soil group
- * from physical texture, and provides verified agronomic advisories.
+ * Exclusively accepts authentic agricultural soil, clods, clay, sand, and earth samples.
+ * Strictly detects and rejects:
+ * 1. Plant leaves & crop foliage (healthy, diseased, yellowing, or spotted leaves)
+ * 2. Human subjects, skin, faces, and hands (smooth dermis lacking soil texture)
+ * 3. Artificial objects, plastics, clothing, and synthetic colors
+ * 4. Overexposed screens, documents, glare, and underexposed darkness
+ * 5. Smooth surfaces lacking natural soil aggregate granularity
+ *
+ * Adheres strictly to scientific agronomy standards (ICAR & NBSS&LUP benchmarks).
  */
 
 import { INDIAN_SOIL_GROUPS, SOIL_TEXTURE_CLASSES } from '../data/soilCropKnowledgeBase.js';
@@ -13,20 +17,26 @@ import { INDIAN_SOIL_GROUPS, SOIL_TEXTURE_CLASSES } from '../data/soilCropKnowle
 export async function processAndAnalyzeSoilImage(imageFile) {
   // 1. Basic File Validation
   if (!imageFile) {
-    throw new Error('No image file selected.');
+    const err = new Error('No image file selected.');
+    err.code = 'NO_FILE';
+    throw err;
   }
 
   const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
   if (!validTypes.includes(imageFile.type.toLowerCase())) {
-    throw new Error('Unsupported file format. Please upload a PNG, JPG, or WEBP photograph.');
+    const err = new Error('Unsupported file format. Please upload a PNG, JPG, or WEBP photograph.');
+    err.code = 'INVALID_FORMAT';
+    throw err;
   }
 
   const maxSizeBytes = 10 * 1024 * 1024; // 10MB
   if (imageFile.size > maxSizeBytes) {
-    throw new Error('File size exceeds 10MB limit. Please upload a compressed or standard resolution photo.');
+    const err = new Error('File size exceeds 10MB limit. Please upload a compressed or standard resolution photo.');
+    err.code = 'FILE_TOO_LARGE';
+    throw err;
   }
 
-  // 2. Load Image into Canvas for Analysis
+  // 2. Load Image into Canvas for Computer Vision Inspection
   return new Promise((resolve, reject) => {
     const img = new Image();
     const objectUrl = URL.createObjectURL(imageFile);
@@ -38,13 +48,15 @@ export async function processAndAnalyzeSoilImage(imageFile) {
         resolve(analysis);
       } catch (err) {
         URL.revokeObjectURL(objectUrl);
-        reject(new Error(`Soil analysis failed: ${err.message}`));
+        reject(err);
       }
     };
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error('Unable to read or decode image. The file may be corrupted or unreadable.'));
+      const err = new Error('Unable to read or decode image. The file may be corrupted or unreadable.');
+      err.code = 'DECODE_ERROR';
+      reject(err);
     };
 
     img.src = objectUrl;
@@ -53,7 +65,7 @@ export async function processAndAnalyzeSoilImage(imageFile) {
 
 function performCanvasSoilAnalysis(img, imageFile) {
   const canvas = document.createElement('canvas');
-  const sampleSize = 160; // 160x160 sample grid for fast, accurate statistics
+  const sampleSize = 160; // 160x160 sample grid = 25,600 pixels
   canvas.width = sampleSize;
   canvas.height = sampleSize;
   const ctx = canvas.getContext('2d');
@@ -63,79 +75,27 @@ function performCanvasSoilAnalysis(img, imageFile) {
   const totalPixels = sampleSize * sampleSize;
 
   let rTotal = 0, gTotal = 0, bTotal = 0;
-  let soilPixels = 0;
-  let faceSkinPixels = 0;
-  let vibrantGreenFoliagePixels = 0;
-  let pureWhiteOrScreenPixels = 0;
 
-  // Specific Soil Class Optical Counters
+  // Non-Soil Rejection Counters
+  let plantFoliagePixels = 0;          // Green leaves, stems, veins, weeds
+  let chlorosisOrYellowLeafPixels = 0;  // Chlorotic yellowing around leaf spots / diseased leaf tissue
+  let faceSkinPixels = 0;               // Human skin tones
+  let unnaturalSyntheticPixels = 0;     // Vivid blues, purples, cyans, high-saturation synthetics
+  let pureWhiteOrScreenPixels = 0;      // Digital screen glare, document white
+  let pitchBlackPixels = 0;             // Pitch black voids
+
+  // Authentic Soil Mineral Counters
   let redSoilPixels = 0;
   let blackSoilPixels = 0;
   let sandyDesertPixels = 0;
   let alluvialSiltPixels = 0;
   let forestHumusPixels = 0;
+  let genuineSoilPixels = 0;
 
   let gradientSum = 0;
 
-  // Pixel-by-pixel multi-spectral analysis
-  for (let i = 0; i < imgData.length; i += 4) {
-    const r = imgData[i];
-    const g = imgData[i + 1];
-    const b = imgData[i + 2];
-
-    rTotal += r;
-    gTotal += g;
-    bTotal += b;
-
-    const brightness = (r + g + b) / 3.0;
-
-    // Detect skin tones (human face closeups)
-    if (r > 130 && g > 85 && b > 65 && r > g + 18 && g > b + 10 && g < 175) {
-      faceSkinPixels++;
-    }
-
-    // Detect vibrant green leaf foliage (Plant leaves instead of ground soil)
-    if (g > r + 20 && g > b + 20 && g > 85) {
-      vibrantGreenFoliagePixels++;
-    }
-
-    // Detect solid white / digital screen glare
-    if (r > 240 && g > 240 && b > 240) {
-      pureWhiteOrScreenPixels++;
-    }
-
-    // --- 1. Red & Laterite Soil Signature (Iron Oxide / Ferric Dominance) ---
-    // Prominent Redness: r significantly higher than g and b
-    if (r > 95 && r > g + 16 && g >= b - 12 && (r - b) > 30) {
-      redSoilPixels++;
-      soilPixels++;
-    }
-    // --- 2. Black Cotton / Regur Soil Signature (Low Albedo / Titaniferous Humus) ---
-    // Dark neutral tones, low chromatic difference
-    else if (brightness < 80 && Math.abs(r - g) < 18 && Math.abs(g - b) < 18) {
-      blackSoilPixels++;
-      soilPixels++;
-    }
-    // --- 3. Desert / Arid Sandy Signature (High Reflectance / Silica Ochre) ---
-    // High brightness, pale yellow-tan
-    else if (brightness > 135 && r > 130 && g > 115 && b > 65 && r >= g && g > b) {
-      sandyDesertPixels++;
-      soilPixels++;
-    }
-    // --- 4. Forest / Mountain Humus (Dark Rich Brown Organic Horizon) ---
-    else if (brightness >= 75 && brightness < 110 && r > g && g > b && (r - g) < 25 && (g - b) > 10) {
-      forestHumusPixels++;
-      soilPixels++;
-    }
-    // --- 5. Alluvial River Plain / Silty Loam Signature ---
-    // Balanced greyish-brown / khaki-brown
-    else if (r > 70 && g > 60 && b > 45 && r >= g && (r - b) < 55) {
-      alluvialSiltPixels++;
-      soilPixels++;
-    }
-  }
-
-  // Edge and Texture Granularity Gradient (Laplacian approximation on luminosity)
+  // 1. Calculate Edge and Texture Granularity Gradient FIRST
+  // Soil clods have high-frequency edge texture; skin and screens are smooth
   for (let y = 1; y < sampleSize - 1; y += 2) {
     for (let x = 1; x < sampleSize - 1; x += 2) {
       const idx = (y * sampleSize + x) * 4;
@@ -147,38 +107,228 @@ function performCanvasSoilAnalysis(img, imageFile) {
   }
 
   const averageGradient = gradientSum / ((sampleSize / 2) * (sampleSize / 2));
-  const isBlurry = averageGradient < 8.0;
+  const isBlurry = averageGradient < 7.0;
+
+  // 2. Pixel-by-pixel multi-spectral color & mineral analysis
+  for (let i = 0; i < imgData.length; i += 4) {
+    const r = imgData[i];
+    const g = imgData[i + 1];
+    const b = imgData[i + 2];
+
+    rTotal += r;
+    gTotal += g;
+    bTotal += b;
+
+    const brightness = (r + g + b) / 3.0;
+    const sumRGB = r + g + b + 0.001;
+    const rNorm = r / sumRGB;
+    const gNorm = g / sumRGB;
+    const bNorm = b / sumRGB;
+    const maxChannel = Math.max(r, g, b);
+    const minChannel = Math.min(r, g, b);
+    const saturation = maxChannel > 0 ? (maxChannel - minChannel) / maxChannel : 0;
+
+    // -------------------------------------------------------------
+    // NON-SOIL DETECTION 1: Plant Leaf & Crop Foliage
+    // -------------------------------------------------------------
+    const excessGreen = 2 * g - r - b;
+
+    // A. Healthy or dark green leaf blade / veins / foliage
+    const isChlorophyllGreen = (excessGreen > 8 && g > r + 3 && g > b + 8 && g >= 35) ||
+                               (g > r && g > b + 15 && g >= 35 && g <= 245) ||
+                               (g >= r - 3 && g > b + 25 && g >= 50);
+
+    if (isChlorophyllGreen) {
+      plantFoliagePixels++;
+    }
+
+    // B. Chlorotic Yellow Leaf Blade / Halo around necrotic leaf spots
+    // In plant leaves, chlorosis has green close to red (g >= r - 6) and much higher than blue
+    const isChlorosisYellow = (r >= 85 && g >= 85 && b <= 120 && g >= r - 6 && (g > b + 30));
+    if (isChlorosisYellow) {
+      chlorosisOrYellowLeafPixels++;
+    }
+
+    // -------------------------------------------------------------
+    // NON-SOIL DETECTION 2: Human Skin (YCbCr + Normalized RGB)
+    // CRITICAL: Real human skin reflects blue (bNorm >= 0.17, r/b <= 3.2),
+    // whereas iron-oxide red soil absorbs blue heavily (bNorm < 0.16, r/b > 3.3).
+    // Furthermore, skin is smooth: only evaluate skin if image texture is smooth!
+    // -------------------------------------------------------------
+    const isSkinColor = (rNorm >= 0.38 && rNorm <= 0.52 && 
+                         gNorm >= 0.28 && gNorm <= 0.36 && 
+                         bNorm >= 0.17 && bNorm <= 0.28 && 
+                         (r / (b + 1) <= 3.2));
+    if (isSkinColor && averageGradient < 8.0) {
+      faceSkinPixels++;
+    }
+
+    // -------------------------------------------------------------
+    // NON-SOIL DETECTION 3: Screen Glare / White Document
+    // -------------------------------------------------------------
+    if (r > 235 && g > 235 && b > 235) {
+      pureWhiteOrScreenPixels++;
+    }
+
+    // -------------------------------------------------------------
+    // NON-SOIL DETECTION 4: Pitch Black Void
+    // -------------------------------------------------------------
+    if (r < 18 && g < 18 && b < 18) {
+      pitchBlackPixels++;
+    }
+
+    // -------------------------------------------------------------
+    // NON-SOIL DETECTION 5: Unnatural Synthetic Colors
+    // (Sky, water, plastics, clothing, vivid paint, neon)
+    // -------------------------------------------------------------
+    const isBlueSkyOrCloth = (b > r + 20 && b > g + 12 && b > 65);
+    const isMagentaPurple = (r > 115 && b > 95 && g < 85 && (r - g > 30) && (b - g > 20));
+    const isCyanTurquoise = (g > 100 && b > 100 && r < 75);
+    const isNeonArtificial = (saturation > 0.75 && brightness > 100 && (rNorm > 0.65 || gNorm > 0.58));
+    if (isBlueSkyOrCloth || isMagentaPurple || isCyanTurquoise || isNeonArtificial) {
+      unnaturalSyntheticPixels++;
+    }
+
+    // -------------------------------------------------------------
+    // AUTHENTIC SOIL MINERAL CRITERIA
+    // -------------------------------------------------------------
+    // In pedology, natural soil consists of earth pigments (Fe2O3, goethite, humus, silicates):
+    // Universally: R >= G - 6, G >= B - 10, and saturation is moderate (<= 0.85).
+    const isEarthChromaticity = (r >= g - 6) && (g >= b - 10) && (saturation <= 0.85);
+
+    if (isEarthChromaticity && !isChlorophyllGreen && !isChlorosisYellow) {
+      // 1. Red & Laterite Soil: Ferric / Iron-oxide rich terracotta clods
+      if (r >= 85 && (r - g) >= 15 && (r - b) >= 25 && g <= 175 && brightness >= 35 && brightness <= 200) {
+        redSoilPixels++;
+        genuineSoilPixels++;
+      }
+      // 2. Black Cotton / Vertisol: Titaniferous humus / dark basaltic clay
+      else if (brightness >= 18 && brightness <= 85 && Math.abs(r - g) <= 18 && Math.abs(g - b) <= 18 && r <= 95 && g <= 95 && b <= 90) {
+        blackSoilPixels++;
+        genuineSoilPixels++;
+      }
+      // 3. Arid & Desert Sand: Weathered quartz / silica ochre
+      else if (brightness >= 110 && brightness <= 225 && r >= 115 && g >= 95 && b >= 50 && (r - g) >= 4 && (r - b) >= 20) {
+        sandyDesertPixels++;
+        genuineSoilPixels++;
+      }
+      // 4. Forest / Mountain Humus: Dark organic horizon
+      else if (brightness >= 35 && brightness <= 115 && r >= 45 && g >= 35 && b >= 20 && (r - g) >= 4 && (r - b) >= 10) {
+        forestHumusPixels++;
+        genuineSoilPixels++;
+      }
+      // 5. Alluvial Silt / Loam: Khaki / grayish-brown river plain deposit
+      else if (brightness >= 50 && brightness <= 185 && r >= 55 && g >= 45 && b >= 30 && r >= g - 2 && (r - b) <= 65) {
+        alluvialSiltPixels++;
+        genuineSoilPixels++;
+      }
+    }
+  }
+
+  const greenRatio = plantFoliagePixels / totalPixels;
+  const yellowRatio = chlorosisOrYellowLeafPixels / totalPixels;
+  const leafFoliageRatio = greenRatio + ((greenRatio > 0.02 || yellowRatio > 0.25) ? yellowRatio : 0);
 
   const faceRatio = faceSkinPixels / totalPixels;
-  const foliageRatio = vibrantGreenFoliagePixels / totalPixels;
   const whiteRatio = pureWhiteOrScreenPixels / totalPixels;
-  const soilRatio = soilPixels / totalPixels;
+  const blackVoidRatio = pitchBlackPixels / totalPixels;
+  const unnaturalRatio = unnaturalSyntheticPixels / totalPixels;
+  const soilRatio = genuineSoilPixels / totalPixels;
+  const avgBrightness = (rTotal + gTotal + bTotal) / (3 * totalPixels);
 
-  // Strict Suitability Validation
-  if (faceRatio > 0.40) {
-    throw new Error('Unsuitable Sample: The image appears to contain a human subject. Please capture or upload a dedicated photograph of an agricultural soil bed or field soil clod.');
+  // Helper function to throw structured validation errors
+  const rejectWithCode = (code, message, subMessage, suggestionTab = null) => {
+    const err = new Error(message);
+    err.code = code;
+    err.customMessage = message;
+    err.subMessage = subMessage;
+    err.suggestionTab = suggestionTab;
+    throw err;
+  };
+
+  // =============================================================
+  // STRICT SUITABILITY & NON-SOIL REJECTION PIPELINE
+  // =============================================================
+
+  // 1. REJECT PLANT LEAVES & CROP FOLIAGE
+  // Catches healthy leaves, diseased leaves with spots (like Early Blight), and stems.
+  // Genuine soil has 0% chlorophyll green leaves.
+  if (greenRatio >= 0.05 || leafFoliageRatio >= 0.08) {
+    rejectWithCode(
+      'PLANT_LEAF_DETECTED',
+      'पौधे की पत्ती (Plant Leaf) डिटेक्ट हुई है — केवल मिट्टी (Soil) की फोटो अपलोड करें।',
+      'The uploaded image contains a plant leaf or crop foliage rather than ground soil. If your plant has disease spots, yellowing, or blight, please use our Plant Disease Diagnosis module to inspect the leaf.',
+      'diagnose'
+    );
   }
 
-  if (foliageRatio > 0.70) {
-    throw new Error('Unsuitable Sample: The image contains predominant plant leaf foliage rather than soil. Please use our AI Plant Diagnosis module for leaves, or take a close-up photo of the ground soil.');
+  // 2. REJECT HUMAN SUBJECTS / PORTRAITS / SKIN
+  // Only triggers on smooth images with high skin-color ratio and low soil mineral dominance
+  if (faceRatio >= 0.30 && averageGradient < 8.0 && soilRatio < 0.35) {
+    rejectWithCode(
+      'HUMAN_DETECTED',
+      'इंसान का चेहरा / त्वचा (Human Subject) डिटेक्ट हुआ है।',
+      'The photograph appears to contain a person or skin tone. SoilSense AI is strictly designed to inspect agricultural ground soil or potting soil clods.'
+    );
   }
 
-  if (whiteRatio > 0.75) {
-    throw new Error('Unsuitable Sample: The photo is severely overexposed or displays an empty white screen/document. Please photograph soil under natural ambient daylight.');
+  // 3. REJECT UNNATURAL / SYNTHETIC / ARTIFICIAL OBJECTS
+  if (unnaturalRatio >= 0.08) {
+    rejectWithCode(
+      'NON_SOIL_OBJECT',
+      'अप्राकृतिक वस्तु / गैर-मिट्टी (Non-Soil Object) डिटेक्ट हुई है।',
+      'Artificial colors, clothing, plastics, painted surfaces, or synthetic materials detected. Please upload a direct photograph of agricultural soil, clay, sand, or field earth.'
+    );
   }
 
-  if (soilRatio < 0.20) {
-    throw new Error('Unsuitable Sample: The photo does not contain recognizable soil aggregate characteristics. Please ensure the camera is focused on the soil surface at a distance of 15–30 cm.');
+  // 4. REJECT OVEREXPOSED / WHITE SCREEN / BLANK DOCUMENT
+  if (whiteRatio >= 0.40) {
+    rejectWithCode(
+      'OVEREXPOSED_OR_SCREEN',
+      'अत्यधिक उजाला / खाली स्क्रीन (Overexposed / Blank Screen) डिटेक्ट हुई है।',
+      'The photograph is severely overexposed or displays an empty white screen/document. Please photograph soil under natural daylight.'
+    );
   }
 
-  // Color Averages
+  // 5. REJECT UNDEREXPOSED / PITCH BLACK VOID
+  if (blackVoidRatio >= 0.50 && avgBrightness < 25) {
+    rejectWithCode(
+      'UNDEREXPOSED',
+      'फोटो में अत्यधिक अंधेरा है (Underexposed / Too Dark)।',
+      'The photograph is too dark to resolve soil aggregates or mineral reflectance. Please photograph soil under adequate daylight.'
+    );
+  }
+
+  // 6. REJECT SMOOTH SURFACES LACKING SOIL TEXTURE
+  if (averageGradient < 3.5) {
+    rejectWithCode(
+      'SMOOTH_SURFACE_NOT_SOIL',
+      'समतल सतह डिटेक्ट हुई है (Smooth Surface / Lacks Soil Texture)।',
+      'The uploaded image lacks the natural aggregate texture, clods, or granularity of agricultural soil. Please photograph genuine field soil outdoors.'
+    );
+  }
+
+  // 7. POSITIVE SOIL RATIO REQUIREMENT
+  // Real agricultural soil photos have high dominance of genuine soil minerals
+  if (soilRatio < 0.45) {
+    rejectWithCode(
+      'NOT_SOIL_IMAGE',
+      'मिट्टी नहीं पाई गई (No Soil Detected) — केवल मिट्टी की फोटो अपलोड करें।',
+      'We could not identify recognizable agricultural soil aggregates, clods, or earth minerals in this photo. Please upload a clear photograph of field soil, clay, sand, or garden dirt.'
+    );
+  }
+
+  // =============================================================
+  // SOIL GROUP & TEXTURE CLASSIFICATION (FOR VERIFIED SOIL SAMPLES)
+  // =============================================================
+
   const avgR = rTotal / totalPixels;
   const avgG = gTotal / totalPixels;
   const avgB = bTotal / totalPixels;
   const overallBrightness = (avgR + avgG + avgB) / 3.0;
   const redExcess = avgR - (avgG + avgB) / 2.0;
 
-  // Percentages of identified soil types
+  // Percentage within total identified soil minerals
   const redPct = (redSoilPixels / totalPixels) * 100;
   const blackPct = (blackSoilPixels / totalPixels) * 100;
   const sandPct = (sandyDesertPixels / totalPixels) * 100;
@@ -187,19 +337,17 @@ function performCanvasSoilAnalysis(img, imageFile) {
 
   let predictedGroup = 'alluvial';
   let estimatedTexture = 'loam';
-  let confidence = 82.0;
+  let confidence = 84.0;
   let alternativeClasses = [];
   let isLowConfidence = false;
   let cautionMessage = null;
 
   // 1. Check for RED & LATERITE SOIL
-  // High red dominance, reddish terracotta hue
-  if (redPct > 28 || (redExcess > 20 && avgR > 115 && avgR > avgG + 15)) {
-    if (avgR > 140 && averageGradient > 18) {
-      // Coarse, nodular, leached laterite
+  if (redPct > 20 || (redExcess > 16 && avgR > 110)) {
+    if (avgR > 135 || averageGradient > 14) {
       predictedGroup = 'laterite';
       estimatedTexture = 'sandy_loam';
-      confidence = Math.min(94.2, 82.5 + (redPct * 0.18));
+      confidence = Math.min(94.5, 82.5 + (redPct * 0.18));
       alternativeClasses = [
         { group: 'red_yellow', name: 'Red and Yellow Soil', confidence: 15.5 },
         { group: 'alluvial', name: 'Sandy Alluvial Transition', confidence: 4.0 }
@@ -215,10 +363,8 @@ function performCanvasSoilAnalysis(img, imageFile) {
     }
   }
   // 2. Check for BLACK COTTON / VERTISOL SOIL
-  // Low brightness, dark charcoal / grey-black hue
-  else if (blackPct > 25 || (overallBrightness < 82 && redExcess < 14 && Math.abs(avgR - avgG) < 18)) {
+  else if (blackPct > 22 || (overallBrightness < 82 && redExcess < 14 && Math.abs(avgR - avgG) < 18)) {
     predictedGroup = 'black';
-    // If high gradient: deep shrink-swell cracks and fissures typical of Vertisols
     estimatedTexture = averageGradient > 16 ? 'heavy_clay' : 'clay_loam';
     confidence = Math.min(95.0, 81.5 + (blackPct * 0.2) + ((85 - overallBrightness) * 0.25));
     alternativeClasses = [
@@ -227,8 +373,7 @@ function performCanvasSoilAnalysis(img, imageFile) {
     ];
   }
   // 3. Check for ARID & DESERT SANDY SOIL
-  // High reflectance, pale ochre, low cohesion
-  else if (sandPct > 28 || (overallBrightness > 128 && avgR > 130 && avgG > 115 && avgB > 65)) {
+  else if (sandPct > 25 || (overallBrightness > 125 && avgR > 125 && avgG > 105 && avgB > 55)) {
     predictedGroup = 'arid_desert';
     estimatedTexture = 'sandy';
     confidence = Math.min(93.5, 83.0 + (sandPct * 0.15));
@@ -238,8 +383,7 @@ function performCanvasSoilAnalysis(img, imageFile) {
     ];
   }
   // 4. Check for FOREST & MOUNTAIN HUMUS SOIL
-  // Rich organic brown, dark loam
-  else if (forestPct > 35 && overallBrightness < 105 && averageGradient > 20) {
+  else if (forestPct > 30 && overallBrightness < 105 && averageGradient > 16) {
     predictedGroup = 'forest_mountain';
     estimatedTexture = 'loam';
     confidence = Math.min(89.5, 78.0 + (forestPct * 0.15));
@@ -251,8 +395,7 @@ function performCanvasSoilAnalysis(img, imageFile) {
   // 5. Default to ALLUVIAL SOIL (Indo-Gangetic Basin)
   else {
     predictedGroup = 'alluvial';
-    // Distinguish between coarse Khadar (sandy loam) vs Bhangar (clay loam / silty clay loam)
-    if (averageGradient > 20 || overallBrightness < 95) {
+    if (averageGradient > 18 || overallBrightness < 95) {
       estimatedTexture = 'silty_clay_loam';
     } else if (overallBrightness > 118) {
       estimatedTexture = 'sandy_loam';
@@ -268,7 +411,7 @@ function performCanvasSoilAnalysis(img, imageFile) {
 
   // Blurriness adjustment
   if (isBlurry) {
-    confidence = Math.max(54.0, confidence - 20.0);
+    confidence = Math.max(54.0, confidence - 16.0);
     isLowConfidence = true;
     cautionMessage = 'The uploaded soil image exhibits optical blur or limited surface texture detail. Confidence has been calibrated downward. Please inspect the prediction and consider taking a sharper close-up photograph.';
   }
@@ -276,7 +419,6 @@ function performCanvasSoilAnalysis(img, imageFile) {
   const groupInfo = INDIAN_SOIL_GROUPS[predictedGroup] || INDIAN_SOIL_GROUPS.alluvial;
   const textureInfo = SOIL_TEXTURE_CLASSES[estimatedTexture] || SOIL_TEXTURE_CLASSES.loam;
 
-  // Tailored Agronomic Next Steps based on specific soil group
   const tailoredNextSteps = getTailoredNextSteps(predictedGroup);
 
   return {
