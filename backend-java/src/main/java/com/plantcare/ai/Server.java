@@ -10,6 +10,8 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
+import java.nio.file.Files;
+
 public class Server {
 
     public static void main(String[] args) throws Exception {
@@ -35,6 +37,13 @@ public class Server {
         server.createContext("/api/v1/soil/history", new SoilHistoryHandler());
         server.createContext("/api/v1/soil/knowledge", new SoilKnowledgeHandler());
 
+        // Root Static File Handler (serves full frontend UI on http://localhost:8080/ as well!)
+        File distDir = new File("../frontend/dist");
+        if (!distDir.exists()) {
+            distDir = new File("frontend/dist");
+        }
+        server.createContext("/", new StaticFileHandler(distDir));
+
         server.setExecutor(null); // default executor
         System.out.println("🌿 Starting Plant Care AI Java Server on http://localhost:" + port + "/api/v1/health");
         server.start();
@@ -56,6 +65,39 @@ public class Server {
                 return;
             }
 
+            String accept = exchange.getRequestHeaders().getFirst("Accept");
+            if (accept != null && accept.contains("text/html")) {
+                String html = "<!DOCTYPE html>" +
+                        "<html lang='en'><head><meta charset='UTF-8'><title>Smart Farm IQ - Backend Status</title>" +
+                        "<style>" +
+                        "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0F172A; color: #F8FAFC; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }" +
+                        ".card { background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 36px; max-width: 580px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }" +
+                        ".badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10B981; font-weight: 700; padding: 6px 16px; border-radius: 9999px; font-size: 0.9rem; margin-bottom: 20px; }" +
+                        "h1 { font-size: 1.75rem; margin: 0 0 10px; color: #FFFFFF; }" +
+                        "p { color: #94A3B8; font-size: 0.95rem; line-height: 1.6; margin: 0 0 24px; }" +
+                        ".btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 1.05rem; padding: 14px 28px; border-radius: 10px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); margin-bottom: 14px; width: 100%; box-sizing: border-box; }" +
+                        ".btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(16, 185, 129, 0.5); }" +
+                        ".btn-secondary { display: inline-block; color: #38BDF8; text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; }" +
+                        ".btn-secondary:hover { text-decoration: underline; }" +
+                        "pre { background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 14px; text-align: left; color: #38BDF8; font-size: 0.85rem; overflow-x: auto; margin-top: 24px; }" +
+                        "</style></head><body>" +
+                        "<div class='card'>" +
+                        "<div class='badge'>● Java REST Backend Online & Ready</div>" +
+                        "<h1>🌿 Smart Farm IQ AI Platform</h1>" +
+                        "<p>Yeh Java Backend API endpoint hai. Main Web Application Dashboard dekhne ke liye neeche diye gaye button par click karein:</p>" +
+                        "<a href='http://localhost:5174' class='btn-primary'>🚀 Open Web App Dashboard (Port 5174) 👉</a>" +
+                        "<a href='http://localhost:8080/' class='btn-secondary'>📱 Standalone Frontend (Port 8080)</a>" +
+                        "<pre>{\n  \"status\": \"UP\",\n  \"system\": \"Plant Care AI Java Backend\",\n  \"aiEngine\": \"Deep Java Library (DJL)\",\n  \"port\": 8080\n}</pre>" +
+                        "</div></body></html>";
+                byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+                exchange.sendResponseHeaders(200, bytes.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(bytes);
+                os.close();
+                return;
+            }
+
             String jsonResponse = "{\n" +
                     "  \"status\": \"UP\",\n" +
                     "  \"system\": \"Plant Care AI Java Backend\",\n" +
@@ -65,6 +107,57 @@ public class Server {
 
             byte[] bytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(bytes);
+            os.close();
+        }
+    }
+
+    static class StaticFileHandler implements HttpHandler {
+        private final File distDir;
+
+        public StaticFileHandler(File distDir) {
+            this.distDir = distDir;
+        }
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            setCorsHeaders(exchange);
+            String path = exchange.getRequestURI().getPath();
+            if (path == null || path.equals("/") || path.isEmpty()) {
+                path = "/index.html";
+            }
+            File file = new File(distDir, path.startsWith("/") ? path.substring(1) : path);
+            if (!file.exists() || file.isDirectory()) {
+                file = new File(distDir, "index.html");
+            }
+            if (!file.exists()) {
+                String html = "<!DOCTYPE html><html><body style='background:#0F172A;color:white;font-family:sans-serif;text-align:center;padding:50px;'>" +
+                        "<h2>Plant Care AI is Running!</h2>" +
+                        "<p><a href='http://localhost:5174' style='color:#10B981;font-size:1.2rem;font-weight:bold;'>Click here to open the Web App Dashboard (http://localhost:5174)</a></p>" +
+                        "</body></html>";
+                byte[] b = html.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+                exchange.sendResponseHeaders(200, b.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(b);
+                os.close();
+                return;
+            }
+
+            String mime = "application/octet-stream";
+            String fn = file.getName().toLowerCase();
+            if (fn.endsWith(".html")) mime = "text/html; charset=utf-8";
+            else if (fn.endsWith(".js")) mime = "application/javascript; charset=utf-8";
+            else if (fn.endsWith(".css")) mime = "text/css; charset=utf-8";
+            else if (fn.endsWith(".svg")) mime = "image/svg+xml";
+            else if (fn.endsWith(".png")) mime = "image/png";
+            else if (fn.endsWith(".jpg") || fn.endsWith(".jpeg")) mime = "image/jpeg";
+            else if (fn.endsWith(".json")) mime = "application/json";
+
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            exchange.getResponseHeaders().set("Content-Type", mime);
             exchange.sendResponseHeaders(200, bytes.length);
             OutputStream os = exchange.getResponseBody();
             os.write(bytes);
@@ -439,6 +532,30 @@ public class Server {
                 cropKey = "wheat";
             } else if (lowerFn.contains("cotton") || lowerFn.contains("kapaas")) {
                 cropKey = "cotton";
+            } else if (lowerFn.contains("banana") || lowerFn.contains("kela") || lowerFn.contains("sigatoka")) {
+                cropKey = "banana";
+            } else if (lowerFn.contains("sugarcane") || lowerFn.contains("ganna") || lowerFn.contains("red_rot")) {
+                cropKey = "sugarcane";
+            } else if (lowerFn.contains("rose") || lowerFn.contains("gulab") || lowerFn.contains("black_spot")) {
+                cropKey = "rose";
+            } else if (lowerFn.contains("neem")) {
+                cropKey = "neem";
+            } else if (lowerFn.contains("tulsi") || lowerFn.contains("basil")) {
+                cropKey = "tulsi";
+            } else if (lowerFn.contains("onion") || lowerFn.contains("pyaz") || lowerFn.contains("garlic") || lowerFn.contains("purple_blotch")) {
+                cropKey = "onion";
+            } else if (lowerFn.contains("brinjal") || lowerFn.contains("baingan") || lowerFn.contains("eggplant")) {
+                cropKey = "brinjal";
+            } else if (lowerFn.contains("tea") || lowerFn.contains("chai") || lowerFn.contains("blister")) {
+                cropKey = "tea";
+            } else if (lowerFn.contains("coffee") || lowerFn.contains("coffea")) {
+                cropKey = "coffee";
+            } else if (lowerFn.contains("soybean") || lowerFn.contains("soya")) {
+                cropKey = "soybean";
+            } else if (lowerFn.contains("papaya") || lowerFn.contains("papita") || lowerFn.contains("ringspot")) {
+                cropKey = "papaya";
+            } else if (lowerFn.contains("guava") || lowerFn.contains("amrood") || lowerFn.contains("amrud")) {
+                cropKey = "guava";
             } else if (lowerFn.contains("apple") || lowerFn.contains("seb")) {
                 cropKey = "apple";
             } else if (lowerFn.contains("grape") || lowerFn.contains("angoor")) {
@@ -625,6 +742,186 @@ public class Server {
                     displayName = "Houseplant → Leaf Margin Scorch (पत्ती झुलसन)";
                     urgency = "Standard Care";
                     recsJson = "[{\"category\":\"Humidity Boost\",\"text\":\"Mist leaves daily or place pot on a pebble tray with water to boost humidity.\"},{\"category\":\"Rested Water\",\"text\":\"Use rested tap water to avoid fluoride tip burn on delicate margins.\"}]";
+                }
+            } else if ("banana".equals(cropKey)) {
+                cropName = "Banana (केला)";
+                scientificName = "Musa acuminata";
+                cropIcon = "🍌";
+                if (isHealthy) {
+                    topClass = "Banana___healthy";
+                    displayName = "Banana → Healthy Blade (स्वस्थ केला)";
+                    urgency = "Routine Care";
+                    recsJson = "[{\"category\":\"Desuckering\",\"text\":\"Retain only 1 healthy follower sucker per mother mat.\"},{\"category\":\"Potash Nutrition\",\"text\":\"Apply MOP (200g/plant) in split doses.\"}]";
+                } else {
+                    topClass = "Banana___Black_Sigatoka";
+                    displayName = "Banana → Black Sigatoka (केला सिगाटोका / पत्ती धब्बा)";
+                    urgency = "Immediate Action Required (24-48 Hours)";
+                    recsJson = "[{\"category\":\"Systemic Triazole\",\"text\":\"Spray Propiconazole 25% EC (Tilt 1ml/L) emulsified with mineral oil.\"},{\"category\":\"De-leafing Protocol\",\"text\":\"Excise spotted leaf portions with sterilized knife to halt ascospore discharge.\"}]";
+                }
+            } else if ("sugarcane".equals(cropKey)) {
+                cropName = "Sugarcane (गन्ना)";
+                scientificName = "Saccharum officinarum";
+                cropIcon = "🎋";
+                if (isHealthy) {
+                    topClass = "Sugarcane___healthy";
+                    displayName = "Sugarcane → Healthy Blade (स्वस्थ गन्ना)";
+                    urgency = "Standard Care";
+                    recsJson = "[{\"category\":\"Trash Mulching\",\"text\":\"Apply sugarcane trash mulch (10 cm thick) to conserve soil moisture.\"},{\"category\":\"Propping\",\"text\":\"Tie canes together in August to prevent lodging during gales.\"}]";
+                } else {
+                    topClass = "Sugarcane___Red_rot";
+                    displayName = "Sugarcane → Red Rot (गन्ना लाल सड़न रोग)";
+                    urgency = "CRITICAL Emergency Action (24 Hours)";
+                    recsJson = "[{\"category\":\"Fungicide Sett Treatment\",\"text\":\"Dip setts in Carbendazim 50% WP (Bavistin 2g/L) for 15-20 minutes before planting.\"},{\"category\":\"Uproot Stricken Clumps\",\"text\":\"Uproot infected clumps completely, burn them, and disinfect pit with lime.\"}]";
+                }
+            } else if ("rose".equals(cropKey)) {
+                cropName = "Rose (गुलाब)";
+                scientificName = "Rosa rubiginosa";
+                cropIcon = "🌹";
+                if (isHealthy) {
+                    topClass = "Rose___healthy";
+                    displayName = "Rose → Healthy Foliage (स्वस्थ गुलाब)";
+                    urgency = "Standard Care";
+                    recsJson = "[{\"category\":\"Canopy Pruning\",\"text\":\"Prune outward-facing buds at 45 degree angle for light aeration.\"},{\"category\":\"Morning Bottom Watering\",\"text\":\"Water root base early morning. Avoid wetting foliage in evening.\"}]";
+                } else {
+                    topClass = "Rose___Black_spot";
+                    displayName = "Rose → Black Spot (गुलाब काला धब्बा रोग)";
+                    urgency = "Action Required within 48 Hours";
+                    recsJson = "[{\"category\":\"Fungicide Spray\",\"text\":\"Spray Difenoconazole 25% EC (Score 0.5ml/L) or Mancozeb 75% WP (2g/L).\"},{\"category\":\"Sanitary Defoliation\",\"text\":\"Strip off spotted lower leaves and burn. Never add diseased rose leaves to compost.\"}]";
+                }
+            } else if ("neem".equals(cropKey)) {
+                cropName = "Neem (नीम)";
+                scientificName = "Azadirachta indica";
+                cropIcon = "🌿";
+                if (isHealthy) {
+                    topClass = "Neem___healthy";
+                    displayName = "Neem → Healthy Foliage (स्वस्थ नीम)";
+                    urgency = "Standard Tree Care";
+                    recsJson = "[{\"category\":\"Natural Self-Protection\",\"text\":\"Neem has natural triterpenoid defenses against 200+ insect pests.\"},{\"category\":\"Canopy Shaping\",\"text\":\"Perform light shaping lopping after winter dormancy.\"}]";
+                } else {
+                    topClass = "Neem___Leaf_spot";
+                    displayName = "Neem → Leaf Spot (नीम पर्ण धब्बा)";
+                    urgency = "Action within 1 Week";
+                    recsJson = "[{\"category\":\"Copper Spray\",\"text\":\"Apply Copper Oxychloride 50% WP (Blitox 2.5g/L) during persistent humid spells.\"},{\"category\":\"Litter Cleanup\",\"text\":\"Rake and destroy dropped leaves under canopy.\"}]";
+                }
+            } else if ("tulsi".equals(cropKey)) {
+                cropName = "Tulsi / Holy Basil (तुलसी)";
+                scientificName = "Ocimum sanctum";
+                cropIcon = "🍃";
+                if (isHealthy) {
+                    topClass = "Tulsi___healthy";
+                    displayName = "Tulsi → Healthy Medicinal Foliage (स्वस्थ तुलसी)";
+                    urgency = "Daily Sacred Care";
+                    recsJson = "[{\"category\":\"Manjari Pinching\",\"text\":\"Pinch off seed spikes (Manjari) to channel vigor into dense fragrant leaves.\"},{\"category\":\"Morning Sun\",\"text\":\"Provide 5-6 hours of direct sun. Keep soil moist but well-drained.\"}]";
+                } else {
+                    topClass = "Tulsi___Leaf_spot_blight";
+                    displayName = "Tulsi → Leaf Spot & Blight (तुलसी पत्ती झुलसा)";
+                    urgency = "Action within 48 Hours";
+                    recsJson = "[{\"category\":\"Safe Bio-Fungicide\",\"text\":\"Spray Trichoderma viride 1% WP (Sanjeevani 5g/L). Strictly avoid synthetic chemicals on medicinal Tulsi.\"},{\"category\":\"Neem & Turmeric\",\"text\":\"Spray mild boiled turmeric water (2g/L) as a natural anti-fungal protectant.\"}]";
+                }
+            } else if ("onion".equals(cropKey)) {
+                cropName = "Onion & Garlic (प्याज़ व लहसुन)";
+                scientificName = "Allium cepa";
+                cropIcon = "🧅";
+                if (isHealthy) {
+                    topClass = "Onion___healthy";
+                    displayName = "Onion → Healthy Scape (स्वस्थ प्याज़)";
+                    urgency = "Routine Care";
+                    recsJson = "[{\"category\":\"Sticker Usage\",\"text\":\"Always add sticker/spreader (0.5ml/L) when spraying on waxy onion leaves.\"},{\"category\":\"Pre-Harvest Curing\",\"text\":\"Stop irrigation 15 days before harvest for proper bulb neck drying.\"}]";
+                } else {
+                    topClass = "Onion___Purple_blotch";
+                    displayName = "Onion → Purple Blotch (प्याज़ बैंगनी धब्बा रोग)";
+                    urgency = "Action Required within 48 Hours";
+                    recsJson = "[{\"category\":\"Fungicide + Sticker\",\"text\":\"Apply Difenoconazole (Score 1ml/L) or Mancozeb (2.5g/L) mixed with non-ionic sticker.\"},{\"category\":\"Thrips Management\",\"text\":\"Control thrips vectors with Fipronil or blue sticky traps to prevent entry wounds.\"}]";
+                }
+            } else if ("brinjal".equals(cropKey)) {
+                cropName = "Brinjal / Eggplant (बैंगन)";
+                scientificName = "Solanum melongena";
+                cropIcon = "🍆";
+                if (isHealthy) {
+                    topClass = "Brinjal___healthy";
+                    displayName = "Brinjal → Healthy Canopy (स्वस्थ बैंगन)";
+                    urgency = "Routine Care";
+                    recsJson = "[{\"category\":\"Shoot Borer Monitoring\",\"text\":\"Clip and destroy wilted shoot tips weekly to eliminate early borer larvae.\"},{\"category\":\"Regular Drip\",\"text\":\"Provide consistent root irrigation to avoid fruit bitterness.\"}]";
+                } else {
+                    topClass = "Brinjal___Phomopsis_blight";
+                    displayName = "Brinjal → Phomopsis Blight (बैंगन फोमोप्सिस झुलसा)";
+                    urgency = "Action within 48 Hours";
+                    recsJson = "[{\"category\":\"Fungicide Spray\",\"text\":\"Spray Zineb 75% WP (2g/L) or Copper Oxychloride 50% WP (Blitox 2.5g/L).\"},{\"category\":\"Seed Treatment\",\"text\":\"Use hot-water treated seeds (50 C for 30 mins) for future plantings.\"}]";
+                }
+            } else if ("tea".equals(cropKey)) {
+                cropName = "Tea (चाय)";
+                scientificName = "Camellia sinensis";
+                cropIcon = "🍵";
+                if (isHealthy) {
+                    topClass = "Tea___healthy";
+                    displayName = "Tea → Healthy Flush (स्वस्थ चाय की पत्ती)";
+                    urgency = "Routine Care";
+                    recsJson = "[{\"category\":\"7-Day Plucking Round\",\"text\":\"Maintain strict 7-day plucking rounds of two leaves and a bud.\"},{\"category\":\"Shade Regulation\",\"text\":\"Regulate shade tree canopy to 50-60 percent filtered light.\"}]";
+                } else {
+                    topClass = "Tea___Blister_blight";
+                    displayName = "Tea → Blister Blight (चाय ब्लिस्टर ब्लाइट)";
+                    urgency = "Action within 24-48 Hours";
+                    recsJson = "[{\"category\":\"Fungicide Spray\",\"text\":\"Spray Hexaconazole (Contaf 0.5ml/L) combined with Copper Oxychloride (2g/L).\"},{\"category\":\"Hard Plucking\",\"text\":\"Pluck off all infected shoots to physically remove sporulating blister blisters.\"}]";
+                }
+            } else if ("coffee".equals(cropKey)) {
+                cropName = "Coffee (कॉफ़ी)";
+                scientificName = "Coffea arabica";
+                cropIcon = "☕";
+                if (isHealthy) {
+                    topClass = "Coffee___healthy";
+                    displayName = "Coffee → Healthy Foliage (स्वस्थ कॉफ़ी)";
+                    urgency = "Estate Care";
+                    recsJson = "[{\"category\":\"Two-Tier Shade\",\"text\":\"Maintain Dadap and Silver Oak shade trees to buffer extreme heat.\"},{\"category\":\"Pruning Tertiary Wood\",\"text\":\"Prune whippy tertiary branches to promote primary fruiting wood.\"}]";
+                } else {
+                    topClass = "Coffee___Leaf_rust";
+                    displayName = "Coffee → Coffee Leaf Rust (कॉफ़ी पत्ती रतुआ)";
+                    urgency = "Action Required within 48 Hours";
+                    recsJson = "[{\"category\":\"Triazole Spray\",\"text\":\"Apply Triadimefon 25% WP (Bayleton 1g/L) or Epoxiconazole on orange powdery pustules.\"},{\"category\":\"Pre-Monsoon Wash\",\"text\":\"Apply 0.5% neutral Bordeaux mixture prior to southwest monsoon onset.\"}]";
+                }
+            } else if ("soybean".equals(cropKey)) {
+                cropName = "Soybean (सोयाबीन)";
+                scientificName = "Glycine max";
+                cropIcon = "🌱";
+                if (isHealthy) {
+                    topClass = "Soybean___healthy";
+                    displayName = "Soybean → Healthy Foliage (स्वस्थ सोयाबीन)";
+                    urgency = "Field Care";
+                    recsJson = "[{\"category\":\"Broadbed Furrow\",\"text\":\"Sow on BBF system to avoid waterlogging during monsoon downpours.\"},{\"category\":\"Pod Filling Moisture\",\"text\":\"Ensure adequate soil moisture during R3 and R5 pod filling stages.\"}]";
+                } else {
+                    topClass = "Soybean___Rust";
+                    displayName = "Soybean → Asian Soybean Rust (सोयाबीन रतुआ)";
+                    urgency = "Immediate Action (24-48 Hours)";
+                    recsJson = "[{\"category\":\"Fungicide Spray\",\"text\":\"Apply Hexaconazole 5% EC (Contaf 1ml/L) or Tebuconazole (1ml/L) at first symptom.\"},{\"category\":\"Plant Spacing\",\"text\":\"Maintain 45 cm row spacing to avoid dense damp microclimate that fosters rust.\"}]";
+                }
+            } else if ("papaya".equals(cropKey)) {
+                cropName = "Papaya (पपीता)";
+                scientificName = "Carica papaya";
+                cropIcon = "🍈";
+                if (isHealthy) {
+                    topClass = "Papaya___healthy";
+                    displayName = "Papaya → Healthy Canopy (स्वस्थ पपीता)";
+                    urgency = "Standard Care";
+                    recsJson = "[{\"category\":\"Raised Mounds\",\"text\":\"Plant on 30 cm raised mounds to avoid Pythium stem collar rot.\"},{\"category\":\"Boron Spray\",\"text\":\"Spray 0.1% Borax during fruit set to prevent bumpy latex fruit distortion.\"}]";
+                } else {
+                    topClass = "Papaya___Ringspot_virus";
+                    displayName = "Papaya → Ringspot Virus (पपीता रिंगस्पॉट वायरस)";
+                    urgency = "Immediate Vector Action";
+                    recsJson = "[{\"category\":\"Aphid Vector Control\",\"text\":\"Spray Dimethoate (Rogor 1.5ml/L) or Acetamiprid (0.3g/L) to eliminate transient aphids.\"},{\"category\":\"Strict Roguing\",\"text\":\"Uproot and burn infected trees displaying shoestring foliage immediately.\"}]";
+                }
+            } else if ("guava".equals(cropKey)) {
+                cropName = "Guava (अमरूद)";
+                scientificName = "Psidium guajava";
+                cropIcon = "🍐";
+                if (isHealthy) {
+                    topClass = "Guava___healthy";
+                    displayName = "Guava → Healthy Foliage (स्वस्थ अमरूद)";
+                    urgency = "Orchard Care";
+                    recsJson = "[{\"category\":\"Mrig Bahar Induction\",\"text\":\"Withhold irrigation in summer to force winter fruit flush for best sweetness.\"},{\"category\":\"Fruit Fly Traps\",\"text\":\"Hang methyl eugenol pheromone traps (6/acre) against fruit flies.\"}]";
+                } else {
+                    topClass = "Guava___Wilt";
+                    displayName = "Guava → Guava Wilt (अमरूद उकठा रोग / विल्ट)";
+                    urgency = "CRITICAL Emergency Action (24 Hours)";
+                    recsJson = "[{\"category\":\"Root Basin Drench\",\"text\":\"Drench tree basin with Carbendazim 50% WP (Bavistin 2g/L, 5-10 L per tree).\"},{\"category\":\"Soil pH Adjustment\",\"text\":\"Guava wilt thrives in alkaline soils; apply gypsum to lower pH towards 6.5.\"}]";
                 }
             } else { // tomato
                 cropName = "Tomato (टमाटर)";
