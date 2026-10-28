@@ -1,8 +1,9 @@
 import React from 'react';
 import { 
   Activity, MessageSquare, Plus, Bell, Download, 
-  Layers, TrendingUp, ShoppingCart, Sparkles, Sprout, ArrowRight, CheckCircle2, Smartphone 
+  Layers, TrendingUp, ShoppingCart, Sparkles, Sprout, ArrowRight, CheckCircle2, Smartphone, Cpu 
 } from 'lucide-react';
+import Esp32HardwareWidget from './Esp32HardwareWidget';
 
 export default function DashboardView({
   user,
@@ -11,7 +12,8 @@ export default function DashboardView({
   reminders,
   onTabClick,
   onOpenAddPlant,
-  onOpenInstallModal
+  onOpenInstallModal,
+  onOpenEsp32Cam
 }) {
   return (
     <main style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
@@ -58,6 +60,9 @@ export default function DashboardView({
           <Sparkles size={16} /> Open SoilSense AI <ArrowRight size={15} />
         </button>
       </div>
+
+      {/* ESP32-CAM & MULTI-SENSOR IOT HARDWARE NODE */}
+      <Esp32HardwareWidget onOpenEsp32Cam={onOpenEsp32Cam} />
 
       {/* KPI Stats Grid */}
       <section className="profile-grid">

@@ -15,6 +15,7 @@ import BotanistChatView from './components/assistant/BotanistChatView';
 import HistoryTrendView from './components/history/HistoryTrendView';
 import AdminPanelView from './components/admin/AdminPanelView';
 import InstallAppModal from './components/common/InstallAppModal';
+import Esp32CamModal from './components/common/Esp32CamModal';
 
 import { 
   INITIAL_PLANT_PROFILES, 
@@ -74,12 +75,22 @@ export default function App() {
   const [plantProfiles, setPlantProfiles] = useState(INITIAL_PLANT_PROFILES);
   const [reminders, setReminders] = useState(INITIAL_REMINDERS);
   const [showAddPlantModal, setShowAddPlantModal] = useState(false);
+  const [showEsp32CamModal, setShowEsp32CamModal] = useState(false);
   const [lastDiagnosisResult, setLastDiagnosisResult] = useState(null);
   const [pendingDiagnosisFile, setPendingDiagnosisFile] = useState(null);
 
   const handleSwitchToDiagnosis = (file) => {
     setPendingDiagnosisFile(file || null);
     handleTabClick('diagnose');
+  };
+
+  const handleEsp32CaptureForDiagnosis = (file) => {
+    setPendingDiagnosisFile(file);
+    handleTabClick('diagnose');
+  };
+
+  const handleEsp32CaptureForSoil = (file) => {
+    handleTabClick('soilsense');
   };
 
   // PWA Install State
@@ -241,6 +252,7 @@ export default function App() {
           onTabClick={handleTabClick}
           onOpenAddPlant={() => setShowAddPlantModal(true)}
           onOpenInstallModal={() => setShowInstallModal(true)}
+          onOpenEsp32Cam={() => setShowEsp32CamModal(true)}
         />
       )}
 
@@ -252,6 +264,7 @@ export default function App() {
           }} 
           initialFile={pendingDiagnosisFile}
           onClearInitialFile={() => setPendingDiagnosisFile(null)}
+          onOpenEsp32Cam={() => setShowEsp32CamModal(true)}
         />
       )}
 
@@ -300,6 +313,14 @@ export default function App() {
         onClose={() => setShowInstallModal(false)}
         onInstallClick={handleNativeInstall}
         hasNativePrompt={!!installPrompt}
+      />
+
+      {/* ESP32-CAM IoT Live Modal */}
+      <Esp32CamModal
+        isOpen={showEsp32CamModal}
+        onClose={() => setShowEsp32CamModal(false)}
+        onCaptureForDiagnosis={handleEsp32CaptureForDiagnosis}
+        onCaptureForSoil={handleEsp32CaptureForSoil}
       />
     </div>
   );
