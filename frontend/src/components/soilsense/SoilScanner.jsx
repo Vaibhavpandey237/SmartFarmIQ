@@ -27,31 +27,55 @@ export default function SoilScanner({ onScanComplete, externalFile, onClearExter
     }
   }, [externalFile]);
 
-  // Quick Demo Samples (High-resolution authentic soil photographs for easy testing)
+  // Quick Demo Samples (High-resolution authentic soil photographs representing all 8 Indian classifications)
   const DEMO_SOIL_SAMPLES = [
     {
-      name: 'Alluvial River Plain Soil',
+      name: 'Alluvial River Plain (जलोढ़)',
       type: 'alluvial',
       url: 'https://images.unsplash.com/photo-1598880940371-c756e015fea1?w=500&auto=format&fit=crop&q=80',
-      tag: 'Gangetic Basin'
+      tag: 'Type 1 • Gangetic Basin'
     },
     {
-      name: 'Deccan Black Cotton (Regur)',
+      name: 'Deccan Black Cotton (काली / रेगुर)',
       type: 'black',
       url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500&auto=format&fit=crop&q=80',
-      tag: 'Maharashtra Vertisol'
+      tag: 'Type 2 • Vertisol'
     },
     {
-      name: 'Red Lateritic Upland Soil',
+      name: 'Red & Yellow Soil (लाल-पीली)',
+      type: 'red_yellow',
+      url: 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=500&auto=format&fit=crop&q=80',
+      tag: 'Type 3 • Peninsular Crystalline'
+    },
+    {
+      name: 'Red Lateritic Upland (लेटराइट)',
       type: 'laterite',
       url: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500&auto=format&fit=crop&q=80',
-      tag: 'Western Ghats Leached'
+      tag: 'Type 4 • Western Ghats'
     },
     {
-      name: 'Arid Thar Desert Sand',
+      name: 'Arid Thar Desert Sand (मरुस्थलीय)',
       type: 'arid_desert',
       url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=500&auto=format&fit=crop&q=80',
-      tag: 'Rajasthan Aridisol'
+      tag: 'Type 5 • Rajasthan Aridisol'
+    },
+    {
+      name: 'Saline-Alkaline Usar (लवणीय / ऊसर)',
+      type: 'saline_alkaline',
+      url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
+      tag: 'Type 6 • Solonchak / Usar'
+    },
+    {
+      name: 'Peaty Marshy Wetland (दलदली)',
+      type: 'peaty_marshy',
+      url: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=500&auto=format&fit=crop&q=80',
+      tag: 'Type 7 • Sundarbans / Pokkali'
+    },
+    {
+      name: 'Himalayan Forest (पर्वतीय / वन)',
+      type: 'forest_mountain',
+      url: 'https://images.unsplash.com/photo-1511497584788-87676104235f?w=500&auto=format&fit=crop&q=80',
+      tag: 'Type 8 • Mountain Humus'
     }
   ];
 

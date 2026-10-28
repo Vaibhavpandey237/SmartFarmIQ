@@ -107,38 +107,84 @@ export function calculateCropRecommendations({
       explanations.push(`Assured irrigation support: Ample canal/tube-well water meets full crop evapotranspiration demand.`);
     }
 
-    // 4. CHEMICAL & SOIL-TEST ALIGNMENT (Max 10 points)
-    let chemicalScore = 10;
-    if (soilTest && soilTest.ph) {
-      const ph = parseFloat(soilTest.ph);
-      if (!isNaN(ph)) {
-        if (ph >= crop.phRange.min && ph <= crop.phRange.max) {
-          chemicalScore = 10;
-          explanations.push(`Soil pH (${ph}) is within the verified tolerance envelope (${crop.phRange.optimal}).`);
+    // 4. CHEMICAL & HARDWARE SENSOR ALIGNMENT (Max 15 points)
+    let sensorScore = 10;
+    const effectivePh = parseFloat(soilTest?.ph);
+    const effectiveEc = parseFloat(soilTest?.ec);
+    const effectiveMoisture = parseFloat(soilTest?.moisture);
+    const effectiveTemp = parseFloat(soilTest?.temperature);
+
+    // A. Soil pH matching
+    if (!isNaN(effectivePh)) {
+      if (effectivePh >= crop.phRange.min && effectivePh <= crop.phRange.max) {
+        sensorScore += 3;
+        explanations.push(`Soil pH (${effectivePh}) is within the verified tolerance envelope (${crop.phRange.optimal}).`);
+      } else {
+        sensorScore -= 4;
+        explanations.push(`pH Alert: Field pH (${effectivePh}) is outside optimal range (${crop.phRange.optimal}), requiring soil amendments.`);
+      }
+    }
+
+    // B. EC / Salinity Tolerance Check
+    if (!isNaN(effectiveEc)) {
+      if (effectiveEc > 3.5) {
+        // High salinity condition
+        if (crop.suitableSoils.includes('saline_alkaline') || crop.category.toLowerCase().includes('salt') || crop.id === 'barley' || crop.id === 'dhaincha' || crop.id === 'salt_tolerant_rice') {
+          sensorScore += 5;
+          explanations.push(`High Salinity Synergy: ${crop.name} possesses certified salt/osmotic tolerance up to EC ${effectiveEc} dS/m (ICAR-CSSRI benchmark).`);
         } else {
-          chemicalScore = 2;
-          explanations.push(`pH caution: Field pH (${ph}) is outside optimal range (${crop.phRange.optimal}), requiring soil amendments.`);
+          sensorScore -= 6;
+          explanations.push(`Salinity Stress Caution: Field EC (${effectiveEc} dS/m) exceeds non-saline threshold (< 2.0 dS/m). Susceptible to osmotic drought.`);
+        }
+      } else {
+        sensorScore += 2;
+      }
+    }
+
+    // C. Capacitive Moisture Sensor Check
+    if (!isNaN(effectiveMoisture)) {
+      if (effectiveMoisture < 25) {
+        // Dry soil
+        if (crop.waterTolerance.toLowerCase().includes('drought') || crop.irrigationLevel === 'rainfed') {
+          sensorScore += 3;
+          explanations.push(`Low Moisture Adaptation: Deep taproot withstands current dry capacitive sensor reading (${effectiveMoisture}% moisture).`);
+        } else if (crop.irrigationLevel === 'reliable') {
+          sensorScore -= 4;
+          explanations.push(`Water Deficit Alert: Current soil moisture (${effectiveMoisture}%) is insufficient for ${crop.name}; requires immediate irrigation.`);
+        }
+      } else if (effectiveMoisture > 75) {
+        // Saturated / waterlogged soil
+        if (crop.waterTolerance.toLowerCase().includes('high') || crop.id === 'rice_paddy' || crop.id === 'jute' || crop.id === 'salt_tolerant_rice') {
+          sensorScore += 4;
+          explanations.push(`Saturated Matrix Fit: High soil moisture (${effectiveMoisture}%) ideal for flooded wetland establishment.`);
+        } else {
+          sensorScore -= 5;
+          explanations.push(`Waterlogging Risk: Excessive moisture (${effectiveMoisture}%) risks root asphyxiation and fungal collar rot.`);
         }
       }
     }
-    breakdown.chemicalFit = chemicalScore;
 
-    // 5. REGIONAL / STATE ADAPTABILITY (Max 5 points)
+    breakdown.chemicalFit = Math.min(15, Math.max(0, sensorScore));
+
+    // 5. REGIONAL / STATE ADAPTABILITY & WHERE IT GROWS BEST (Max 10 points)
+    let regionalScore = 3;
     if (state && crop.majorStates.some(s => s.toLowerCase() === state.toLowerCase())) {
-      breakdown.regionalFit = 5;
-      explanations.push(`Proven regional cultivar: Widely cultivated with strong market and procurement presence across ${state}.`);
+      regionalScore = 10;
+      explanations.push(`Proven regional cultivar: Widely cultivated with strong APMC market, MSP procurement, and high yield presence across ${state}.`);
     } else {
-      breakdown.regionalFit = 2;
+      regionalScore = 4;
+      explanations.push(`Secondary zone: Primary high-yielding belts are ${crop.majorStates.slice(0, 3).join(', ')}.`);
     }
+    breakdown.regionalFit = regionalScore;
 
     // 6. FARMING GOAL BONUS
-    if (farmingGoal === 'soil_restoring' && crop.category.includes('Legume')) {
+    if (farmingGoal === 'soil_restoring' && (crop.category.includes('Legume') || crop.id === 'dhaincha')) {
       score += 5;
-      explanations.push(`Goal alignment: Biological nitrogen fixation enhances organic fertility for future crops.`);
+      explanations.push(`Goal alignment: Biological nitrogen fixation & organic acids enhance soil structure for future crop cycles.`);
     } else if (farmingGoal === 'drought_hardy' && crop.waterTolerance.toLowerCase().includes('drought')) {
       score += 5;
       explanations.push(`Goal alignment: Proven drought endurance protects farm capital in water-scarce years.`);
-    } else if (farmingGoal === 'cash_crop' && crop.category.includes('Cash')) {
+    } else if (farmingGoal === 'cash_crop' && (crop.category.includes('Cash') || crop.category.includes('Commercial') || crop.id === 'guar_cluster_bean')) {
       score += 4;
     }
 
@@ -159,21 +205,37 @@ export function calculateCropRecommendations({
       badgeClass = 'suitability-marginal';
     }
 
+    // Dynamic field management advice based on sensor readings
+    const sensorRemedyAdvice = [];
+    if (!isNaN(effectiveEc) && effectiveEc > 3.0) {
+      sensorRemedyAdvice.push(`High Salinity (${effectiveEc} dS/m): Apply Gypsum based on Soil Health Card GR test; sow Dhaincha for green manure; install drainage to leach excess salts.`);
+    }
+    if (!isNaN(effectivePh) && effectivePh > 8.5) {
+      sensorRemedyAdvice.push(`Sodic/Alkaline Soil (pH ${effectivePh}): Incorporate Agricultural Gypsum (2.5–4.0 t/ha) followed by light ponding before transplanting.`);
+    } else if (!isNaN(effectivePh) && effectivePh < 5.8) {
+      sensorRemedyAdvice.push(`Acidic Soil (pH ${effectivePh}): Apply Agricultural Dolomite or Slaked Lime (1.5–2.5 t/ha) to neutralize aluminum toxicity and unlock phosphate.`);
+    }
+    if (!isNaN(effectiveMoisture) && effectiveMoisture < 30) {
+      sensorRemedyAdvice.push(`Moisture Stress (${effectiveMoisture}%): Schedule 1–2 life-saving protective irrigations or apply organic paddy straw mulch (5 t/ha).`);
+    }
+
     return {
       ...crop,
       suitabilityScore: score,
       suitabilityLabel,
       badgeClass,
       breakdown,
-      explanations
+      explanations,
+      sensorRemedyAdvice,
+      whereItGrowsBest: crop.bestGrowingRegions || `Top States: ${crop.majorStates.join(', ')}`
     };
   });
 
   // Sort descending by suitability score
   scoredCrops.sort((a, b) => b.suitabilityScore - a.suitabilityScore);
 
-  // Take top 3 to 5 recommendations
-  const topRecommendations = scoredCrops.slice(0, 5);
+  // Take top 4 to 6 recommendations
+  const topRecommendations = scoredCrops.slice(0, 6);
 
   return {
     recommendations: topRecommendations,

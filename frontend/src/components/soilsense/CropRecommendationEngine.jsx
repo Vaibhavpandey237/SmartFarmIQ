@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Sprout, Droplets, Sun, Calendar, MapPin, Sliders, 
   CheckCircle2, AlertCircle, ArrowRight, ExternalLink, 
-  HelpCircle, Sparkles, BookOpen, Printer, Bookmark 
+  HelpCircle, Sparkles, BookOpen, Printer, Bookmark, Activity, Zap, Cpu
 } from 'lucide-react';
 import { 
   INDIAN_SOIL_GROUPS, 
@@ -10,18 +10,19 @@ import {
   INDIAN_STATES_DISTRICTS 
 } from '../../data/soilCropKnowledgeBase.js';
 import { calculateCropRecommendations } from '../../services/soilRecommendationEngine.js';
+import SoilSensorTelemetryPanel from './SoilSensorTelemetryPanel.jsx';
 
 // Bulletproof fallback in case knowledge base array is empty or undefined
 const SAFE_STATES_DISTRICTS = (INDIAN_STATES_DISTRICTS && INDIAN_STATES_DISTRICTS.length > 0) 
   ? INDIAN_STATES_DISTRICTS 
   : [
-      { state: 'Uttar Pradesh', districts: ['Varanasi', 'Lucknow', 'Kanpur', 'Prayagraj', 'Bareilly', 'Agra'] },
+      { state: 'Uttar Pradesh', districts: ['Varanasi', 'Lucknow', 'Kanpur', 'Prayagraj', 'Bareilly', 'Agra', 'Aligarh'] },
       { state: 'Punjab', districts: ['Ludhiana', 'Amritsar', 'Patiala', 'Jalandhar', 'Bathinda'] },
       { state: 'Haryana', districts: ['Karnal', 'Hisar', 'Ambala', 'Rohtak', 'Sirsa'] },
       { state: 'Maharashtra', districts: ['Pune', 'Nashik', 'Nagpur', 'Aurangabad', 'Solapur'] },
       { state: 'Madhya Pradesh', districts: ['Indore', 'Bhopal', 'Ujjain', 'Jabalpur', 'Gwalior'] },
       { state: 'Gujarat', districts: ['Ahmedabad', 'Surat', 'Rajkot', 'Vadodara', 'Bhavnagar'] },
-      { state: 'Rajasthan', districts: ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur'] }
+      { state: 'Rajasthan', districts: ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur', 'Barmer'] }
     ];
 
 export default function CropRecommendationEngine({ 
@@ -42,13 +43,37 @@ export default function CropRecommendationEngine({
   const [selectedIrrigation, setSelectedIrrigation] = useState('limited');
   const [farmingGoal, setFarmingGoal] = useState('all');
 
-  // Optional Soil-Test Parameters
-  const [showSoilTestInputs, setShowSoilTestInputs] = useState(false);
-  const [soilPh, setSoilPh] = useState(7.0);
-  const [nitrogenStatus, setNitrogenStatus] = useState('medium');
-  const [phosphorusStatus, setPhosphorusStatus] = useState('medium');
-  const [potassiumStatus, setPotassiumStatus] = useState('high');
-  const [organicCarbon, setOrganicCarbon] = useState('0.55');
+  // Live Hardware Sensor & Soil Health Card Telemetry State
+  const [sensorTelemetry, setSensorTelemetry] = useState(() => {
+    const b = INDIAN_SOIL_GROUPS[initialSoilGroup]?.sensorBenchmark;
+    return b ? {
+      moisture: b.moisturePct,
+      temperature: b.tempC,
+      ph: b.ph,
+      ec: b.ecDsm,
+      nitrogen: b.nitrogenKgHa,
+      phosphorus: b.phosphorusKgHa,
+      potassium: b.potassiumKgHa,
+      organicCarbon: b.organicCarbonPct,
+      sandPct: b.sandPct,
+      siltPct: b.siltPct,
+      clayPct: b.clayPct
+    } : {
+      moisture: 45,
+      temperature: 25.5,
+      ph: 7.3,
+      ec: 0.85,
+      nitrogen: 220,
+      phosphorus: 18,
+      potassium: 280,
+      organicCarbon: 0.55,
+      sandPct: 40,
+      siltPct: 40,
+      clayPct: 20
+    };
+  });
+
+  const [showTelemetryPanel, setShowTelemetryPanel] = useState(true);
 
   // Farm Field Details
   const [fieldName, setFieldName] = useState('Field Plot #1');
@@ -73,10 +98,9 @@ export default function CropRecommendationEngine({
     }
   }, [selectedState]);
 
-  // Compute recommendations
+  // Compute recommendations whenever parameters or live telemetry change
   useEffect(() => {
     runRecommendation();
-
   }, [
     selectedSoilGroup, 
     selectedTexture, 
@@ -85,23 +109,10 @@ export default function CropRecommendationEngine({
     selectedSeason, 
     selectedIrrigation, 
     farmingGoal, 
-    showSoilTestInputs, 
-    soilPh, 
-    nitrogenStatus, 
-    phosphorusStatus, 
-    potassiumStatus, 
-    organicCarbon
+    sensorTelemetry
   ]);
 
   const runRecommendation = () => {
-    const soilTestParams = showSoilTestInputs ? {
-      ph: parseFloat(soilPh),
-      nitrogen: nitrogenStatus,
-      phosphorus: phosphorusStatus,
-      potassium: potassiumStatus,
-      organicCarbon: parseFloat(organicCarbon)
-    } : {};
-
     const results = calculateCropRecommendations({
       soilGroupKey: selectedSoilGroup,
       soilTextureKey: selectedTexture,
@@ -109,7 +120,7 @@ export default function CropRecommendationEngine({
       district: selectedDistrict,
       season: selectedSeason,
       irrigation: selectedIrrigation,
-      soilTest: soilTestParams,
+      soilTest: sensorTelemetry,
       farmingGoal
     });
 
@@ -130,7 +141,7 @@ export default function CropRecommendationEngine({
         irrigation: selectedIrrigation,
         soilGroup: INDIAN_SOIL_GROUPS[selectedSoilGroup]?.name || selectedSoilGroup,
         soilTexture: SOIL_TEXTURE_CLASSES[selectedTexture]?.name || selectedTexture,
-        soilTest: showSoilTestInputs ? { ph: soilPh, nitrogen: nitrogenStatus, phosphorus: phosphorusStatus, potassium: potassiumStatus, organicCarbon } : null,
+        soilTest: sensorTelemetry,
         topRecommendations: recommendationsData.recommendations,
         isPreliminary: recommendationsData.isPreliminary
       };
@@ -156,6 +167,20 @@ export default function CropRecommendationEngine({
           </div>
         </div>
       )}
+
+      {/* 📡 LIVE HARDWARE SENSOR & SOIL HEALTH CARD (SHC) TELEMETRY DASHBOARD */}
+      <SoilSensorTelemetryPanel 
+        currentSoilGroup={selectedSoilGroup}
+        sensorData={sensorTelemetry}
+        onSensorDataChange={(updated) => setSensorTelemetry(updated)}
+        onSoilGroupSelect={(groupKey) => setSelectedSoilGroup(groupKey)}
+        selectedState={selectedState}
+        selectedDistrict={selectedDistrict}
+        onLocationChange={(newState, newDistrict) => {
+          setSelectedState(newState);
+          setSelectedDistrict(newDistrict);
+        }}
+      />
 
       {/* MULTI-FACTOR INPUTS CARD */}
       <div className="card crop-engine-form-card">
@@ -452,6 +477,63 @@ export default function CropRecommendationEngine({
                 </div>
                 <p className="crop-scientific-name"><em>{crop.scientificName}</em></p>
 
+                {/* 📍 WHERE IT GROWS BEST (सर्वोत्तम उत्पादक क्षेत्र) */}
+                <div style={{
+                  background: 'rgba(20, 184, 166, 0.08)',
+                  border: '1px solid rgba(20, 184, 166, 0.25)',
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  margin: '0.6rem 0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--accent-teal)' }}>
+                    <MapPin size={13} /> Where It Grows Best (सर्वोत्तम उत्पादक क्षेत्र):
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-main)', margin: '3px 0 0', lineHeight: '1.35' }}>
+                    {crop.whereItGrowsBest || `Top States: ${crop.majorStates.join(', ')}`}
+                  </p>
+                </div>
+
+                {/* 📡 SENSOR SYNERGY BADGES */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '0.4rem 0 0.6rem' }}>
+                  <span style={{ fontSize: '0.72rem', padding: '3px 7px', borderRadius: '6px', background: 'rgba(6, 182, 212, 0.12)', color: '#06B6D4', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Droplets size={11} /> Water: {crop.waterRequirementMm}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', padding: '3px 7px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.12)', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Activity size={11} /> pH: {crop.phRange.optimal}
+                  </span>
+                  {sensorTelemetry?.ec > 2.5 && (
+                    <span style={{
+                      fontSize: '0.72rem',
+                      padding: '3px 7px',
+                      borderRadius: '6px',
+                      background: crop.suitableSoils.includes('saline_alkaline') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.15)',
+                      color: crop.suitableSoils.includes('saline_alkaline') ? '#10B981' : '#EF4444',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontWeight: 600
+                    }}>
+                      <Zap size={11} /> {crop.suitableSoils.includes('saline_alkaline') ? 'Salt-Tolerant ✓' : 'Salinity Stress Risk'}
+                    </span>
+                  )}
+                </div>
+
+                {/* ⚡ SENSOR REMEDIATION ADVICE */}
+                {crop.sensorRemedyAdvice && crop.sensorRemedyAdvice.length > 0 && (
+                  <div style={{
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    borderRadius: '8px',
+                    padding: '6px 8px',
+                    margin: '0.4rem 0',
+                    fontSize: '0.76rem',
+                    color: '#F59E0B',
+                    lineHeight: '1.3'
+                  }}>
+                    <strong>⚡ Field Advisory:</strong> {crop.sensorRemedyAdvice[0]}
+                  </div>
+                )}
+
                 {/* TRANSPARENT COMPATIBILITY BREAKDOWN */}
                 <div className="score-breakdown-bar">
                   <div className="breakdown-segment" title={`Soil Fit: ${crop.breakdown.soilFit}/35`}>
@@ -467,7 +549,7 @@ export default function CropRecommendationEngine({
                     <span className="segment-val">{crop.breakdown.waterFit}</span>
                   </div>
                   <div className="breakdown-segment" title={`Chemical/pH Fit: ${crop.breakdown.chemicalFit}/10`}>
-                    <span className="segment-label">pH/Nutrient</span>
+                    <span className="segment-label">pH/Sensor</span>
                     <span className="segment-val">{crop.breakdown.chemicalFit}</span>
                   </div>
                 </div>
@@ -549,6 +631,16 @@ export default function CropRecommendationEngine({
               </div>
 
               <div className="crop-detail-sections">
+                {/* WHERE IT GROWS BEST */}
+                <div className="card-sub-block" style={{ marginBottom: '1rem', background: 'rgba(20, 184, 166, 0.08)', border: '1px solid rgba(20, 184, 166, 0.25)' }}>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--accent-teal)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={16} /> सर्वोत्तम उत्पादक क्षेत्र (Where It Grows Best in India)
+                  </h4>
+                  <p style={{ fontSize: '0.88rem', lineHeight: '1.5', margin: 0 }}>
+                    {selectedCropModal.whereItGrowsBest || `Major Producing States: ${selectedCropModal.majorStates.join(', ')}`}
+                  </p>
+                </div>
+
                 <div className="card-sub-block" style={{ marginBottom: '1rem' }}>
                   <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--accent-teal)', marginBottom: '0.4rem' }}>
                     🌱 Critical Growing Conditions & Soil Considerations

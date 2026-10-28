@@ -176,6 +176,16 @@ public class SoilService {
                 alternatives.add(createAltMap("laterite", "Laterite Soil", 16.0));
                 alternatives.add(createAltMap("alluvial", "Alluvial Soil", 4.0));
             }
+        } else if (filename.toLowerCase().contains("saline") || filename.toLowerCase().contains("usar") || filename.toLowerCase().contains("alkaline") || (brightness > 150 && Math.abs(avgR - avgG) < 15 && Math.abs(avgG - avgB) < 15)) {
+            predictedGroup = "saline_alkaline";
+            predictedGroupName = "Saline and Alkaline Soil (Usar / Reh)";
+            hindiName = "लवणीय व क्षारीय मिट्टी / ऊसर (Saline & Sodic Soil)";
+            estimatedTexture = "sandy_loam";
+            estimatedTextureName = "Sandy Loam to Dense Clay";
+            confidence = 85.0;
+
+            alternatives.add(createAltMap("alluvial", "Alluvial River Plain", 14.0));
+            alternatives.add(createAltMap("arid_desert", "Arid Saline Depression", 8.0));
         } else if (brightness > 140 && (avgR - avgB) > 35 && avgG > 120) {
             predictedGroup = "arid_desert";
             predictedGroupName = "Desert and Arid Soil";

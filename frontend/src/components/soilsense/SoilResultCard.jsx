@@ -109,7 +109,7 @@ export default function SoilResultCard({
         <div className="soil-details-column">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div>
-              <span className="badge-pill">Major Indian Soil Group</span>
+              <span className="badge-pill">Type {currentSoil.typeNumber || '•'} — Major Indian Soil Group (ICAR-NBSS&LUP)</span>
               <h3 style={{ fontSize: '1.45rem', fontWeight: 700, margin: '0.35rem 0 0.15rem', color: 'var(--text-main)' }}>
                 {currentSoil.name}
               </h3>
@@ -261,6 +261,86 @@ export default function SoilResultCard({
           </div>
         </div>
       </div>
+
+      {/* 📡 SENSOR TELEMETRY & GOVT SOIL HEALTH CARD (SHC) CALIBRATION PROFILE */}
+      {currentSoil?.sensorBenchmark && (
+        <div className="card-sub-block" style={{
+          background: 'rgba(15, 23, 42, 0.75)',
+          border: '1px solid rgba(20, 184, 166, 0.3)',
+          borderRadius: '12px',
+          padding: '1.25rem',
+          margin: '1.25rem 0'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem' }}>
+            <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--accent-teal)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+              <Activity size={18} /> Government Soil Health Card & Hardware Sensor Telemetry Profile
+            </h4>
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+              ICAR-NBSS&LUP Standard Benchmarks
+            </span>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+            gap: '0.75rem'
+          }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Capacitive Moisture</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#06B6D4' }}>{currentSoil.sensorBenchmark.moisturePct}%</div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Typical Field Capacity</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>DS18B20 Temp Probe</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#F97316' }}>{currentSoil.sensorBenchmark.tempC}°C</div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Root-Zone Thermal Index</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Calibrated pH Probe</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#10B981' }}>{currentSoil.sensorBenchmark.ph}</div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{currentSoil.phRange.optimal.split('(')[1]?.replace(')', '') || 'Verified pH'}</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>EC / Salinity Probe</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: currentSoil.sensorBenchmark.ecDsm > 3.0 ? '#EF4444' : '#EC4899' }}>
+                {currentSoil.sensorBenchmark.ecDsm} <span style={{ fontSize: '0.75rem' }}>dS/m</span>
+              </div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{currentSoil.sensorBenchmark.ecDsm > 3.0 ? 'Saline Hazard (>4.0)' : 'Non-saline (<2.0)'}</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Available N-P-K (kg/ha)</div>
+              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#FFFFFF' }}>
+                N:{currentSoil.sensorBenchmark.nitrogenKgHa} • P:{currentSoil.sensorBenchmark.phosphorusKgHa} • K:{currentSoil.sensorBenchmark.potassiumKgHa}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Govt SHC Rating</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Organic Carbon (OC %)</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#14B8A6' }}>{currentSoil.sensorBenchmark.organicCarbonPct}%</div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Humus Health Index</div>
+            </div>
+          </div>
+
+          {/* FORMATION & SUB-TYPES */}
+          <div style={{ marginTop: '0.85rem', fontSize: '0.82rem', lineHeight: '1.45', color: 'var(--text-muted)' }}>
+            {currentSoil.typesOrVariants && (
+              <p style={{ margin: '0 0 0.35rem' }}>
+                <strong style={{ color: 'var(--text-main)' }}>Sub-Types & Formations:</strong> {currentSoil.typesOrVariants}
+              </p>
+            )}
+            {currentSoil.crops && (
+              <p style={{ margin: 0 }}>
+                <strong style={{ color: 'var(--accent-green)' }}>Top Verified Crops for this Soil:</strong> {currentSoil.crops.join(', ')}.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* LIMITATIONS & NEXT STEPS */}
       <div className="limitations-next-steps-grid">
