@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { 
   LayoutDashboard, Activity, ShoppingCart, TrendingUp, Leaf, 
   ChevronDown, ChevronUp, MessageSquare, History, Bell, ShieldCheck,
@@ -17,6 +17,22 @@ export default function NavigationTabs({
   onOpenInstallModal
 }) {
   const isMoreTabActive = ['chat', 'history', 'reminders', 'admin'].includes(activeTab);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMoreDropdownOpen(false);
+      }
+    }
+    if (moreDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [moreDropdownOpen, setMoreDropdownOpen]);
 
   return (
     <>
@@ -71,28 +87,28 @@ export default function NavigationTabs({
       <nav className="tab-bar">
         <div className="tab-btn-group">
           <button className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => onTabClick('dashboard')}>
-            <LayoutDashboard size={18} /> My Dashboard
+            <LayoutDashboard size={17} /> My Dashboard
           </button>
           <button className={`tab-btn ${activeTab === 'diagnose' ? 'active' : ''}`} onClick={() => onTabClick('diagnose')}>
-            <Activity size={18} /> AI Diagnosis
+            <Activity size={17} /> AI Diagnosis
           </button>
           <button className={`tab-btn ${activeTab === 'soilsense' ? 'active' : ''}`} onClick={() => onTabClick('soilsense')}>
-            <Layers size={18} color="var(--accent-teal)" /> SoilSense AI
+            <Layers size={17} color="var(--accent-teal)" /> SoilSense AI
             <span style={{ fontSize: '0.65rem', background: '#10B981', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontWeight: 800, marginLeft: '2px' }}>NEW</span>
           </button>
           <button className={`tab-btn ${activeTab === 'store' ? 'active' : ''}`} onClick={() => onTabClick('store')}>
-            <ShoppingCart size={18} /> Products & Remedies
+            <ShoppingCart size={17} /> Products & Remedies
           </button>
           <button className={`tab-btn ${activeTab === 'cropprices' ? 'active' : ''}`} onClick={() => onTabClick('cropprices')}>
-            <TrendingUp size={18} /> Crop Prices & MSP
+            <TrendingUp size={17} /> Crop Prices & MSP
           </button>
           <button className={`tab-btn ${activeTab === 'garden' ? 'active' : ''}`} onClick={() => onTabClick('garden')}>
-            <Leaf size={18} /> My Garden ({gardenCount})
+            <Leaf size={17} /> My Garden ({gardenCount})
           </button>
         </div>
 
         {/* MORE ▾ DROPDOWN MENU */}
-        <div className="more-dropdown-container">
+        <div className="more-dropdown-container" ref={dropdownRef}>
           <button 
             className={`tab-btn ${isMoreTabActive ? 'active' : ''}`} 
             onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
